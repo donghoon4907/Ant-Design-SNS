@@ -1,0 +1,11 @@
+front/.next
+front/.vscode
+front/node_modules
+front/yarn.lock
+
+server/.vscode
+server/node_modules
+server/.env
+server/routes/images
+server/routes/uploads
+server/yarn.lock

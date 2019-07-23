@@ -1,0 +1,146 @@
+* express 서버 환경 구축하기 
+1. express: node에 내장된 기본 서버 기능을 보완한 프레임워크
+2. bcrypt: 암호화 관련
+3. cookie-parser: 로그인에 사용되는 쿠키
+4. dotenv: 환경변수 설정
+5. express-session: 세션 관련
+6. cors: 프론트엔드 서버와 백엔드 서버의 주소가 다를 때 발생하는 보안 문제를 해결
+7. helmet hpp: 보안 관련
+8. morgan: 로그 관련
+9. multer: 이미지 업로드 관련
+10. passport passport-local: 회원 가입 및 로그인을 쉽게 처리하기
+11. sequelize sequelize-cli: orm( sql + js )
+12. eslint eslint-config-airbnb
+13. nodemon: 서버에 변경된 점을 감지하고 서버 재부팅
+14. axios
+15. mysql2
+
+** nodemon.json
+{
+"watch": ["index.js"], // 해당 파일에 변경점이 생기는지 감시합니다.
+"exec": "node index.js", // 해당 파일을 실행 시킵니다.
+"ext": "js json" // 확장자
+}
+
+** sequelize
+1. npx sequelize init ( will create config/config.json, models/index.js )
+2. config.json
+{
+  "development": {
+    "username": "root",
+    "password": "4907", //데이터베이스 암호
+    "database": "test",  //임의의 이름
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "operatorsAliases": false
+  },
+  "test": {
+    "username": "root",
+    "password": "4907",
+    "database": "test",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "operatorsAliases": false
+  },
+  "production": {
+    "username": "root",
+    "password": "4907",
+    "database": "test",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "operatorsAliases": false
+  }
+}
+
+3. models/index.js
+const Sequelize = require("sequelize");
+const env = process.env.NODE_ENV || "development";
+const config = require("../config/config")[env];
+const db = {};
+
+// config.json에 정의된 데이터를 가져옵니다.
+const sequelize = new Sequelize(
+  config.database,
+  config.username,
+  config.password,
+  config
+);
+
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
+
+4. 테이블 정의하기( models 폴더 내에 생성할 파일 목록 )
+- 유저정보: user.js
+- 게시글정보: post.js
+- 댓글정보: comment.js
+- 해쉬태그정보: hashtag.js
+- 이미지정보: image.js
+
+* user.js
+module.exports = (sequelize, DataTypes) => {
+  const User = sequelize.define(
+    "User", // 대문자로 정의시 적용되는 이름: posts 접두사가 소문자가 되고 접미사에 s가 붙음
+    {
+      nickname: {
+        type: DataTypes.STRING(20),
+        allowNull: false //빈값을 허용안함
+      },
+      userId: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        unique: true //고유값
+      },
+      password: {
+        type: DataTypes.STRING(100),
+        allowNull: false
+      }
+    },
+    {
+      //한글 저장
+      charset: "utf8",
+      collate: "utf-_general_ci"
+    }
+  );
+  // 관계설정 hasMany <> belongsTo 다대다 
+  User.associate = db => {
+    db.User.hasMany(db.Post); //User는 다수의 Post를 가질 수 있음 1:다 
+    db.User.hasMany(db.Comment); //User는 다수의 Comment를 가질 수 있음 1:다 belongsToMany(x, { through: "중재 테이블" });
+  };
+  return User;
+};
+
+* 쿼리 관리
+mysql
+knex
+sequelize/typeorm
+
+5. db connect(index.js)
+- mysql 설치 (mysql2)
+tool: workbench + mysql server
+
+root 계정으로 접속 > new schema 생성 후 squelize config.json 파일 내 database 부분에 새로 생성한 스키마 이름을 표기
+
+- index.js 수정
+
+const db = require("./models");
+db.sequelize.sync();
+
+- models/index.js 수정
+db.Comment = require("./comment")(sequelize, Sequelize);
+db.Hashtag = require("./hashtag")(sequelize, Sequelize);
+db.Image = require("./image")(sequelize, Sequelize);
+db.Post = require("./post")(sequelize, Sequelize);
+db.User = require("./user")(sequelize, Sequelize);
+
+
+
+
+
