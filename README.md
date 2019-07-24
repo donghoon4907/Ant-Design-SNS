@@ -51,3 +51,9 @@ Ant Design, Next.js, express, mysql redux-saga
 1. 이미지 미리보기 및 포스터 작성 시 이미지 업로드 가능하도록 수정(express-fileupload)
 
 - after: 포스트 수정, 삭제, multer 연구
+
+20190724
+
+1. 상세이미지 구현(react-slick)
+
+- after: 포스트 수정, 삭제, multer 연구, 좋아요 부분 다시 확인 DB까지는 저장됨

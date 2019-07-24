@@ -20,7 +20,13 @@ import {
   ADD_COMMENT_FAILURE,
   UPLOAD_IMAGES_REQUEST,
   UPLOAD_IMAGES_SUCCESS,
-  UPLOAD_IMAGES_FAILURE
+  UPLOAD_IMAGES_FAILURE,
+  LIKE_POST_REQUEST,
+  LIKE_POST_SUCCESS,
+  LIKE_POST_FAILURE,
+  UNLIKE_POST_REQUEST,
+  UNLIKE_POST_SUCCESS,
+  UNLIKE_POST_FAILURE
 } from "../reducers/post";
 import axios from "axios";
 
@@ -75,6 +81,28 @@ function uploadImageAPI(files) {
   });
   return axios
     .post("/post/upload", formData, {
+      withCredentials: true
+    })
+    .then(response => ({ response }))
+    .catch(error => ({ error }));
+}
+
+function likePostAPI(postId) {
+  return axios
+    .post(
+      `/post/${postId}/like`,
+      {},
+      {
+        withCredentials: true
+      }
+    )
+    .then(response => ({ response }))
+    .catch(error => ({ error }));
+}
+
+function unlikePostAPI(postId) {
+  return axios
+    .delete(`/post/${postId}/like`, {
       withCredentials: true
     })
     .then(response => ({ response }))
@@ -212,6 +240,44 @@ function* uploadImage(action) {
     alert("알 수 없는 오류가 발생했습니다.");
   }
 }
+
+function* likePost(action) {
+  const { response, error } = yield call(likePostAPI, action.payload);
+  if (response) {
+    yield put({
+      type: LIKE_POST_SUCCESS
+    });
+    alert(response.data);
+  } else if (error) {
+    console.error(error);
+    yield put({
+      type: LIKE_POST_FAILURE,
+      error
+    });
+  } else {
+    console.error(error);
+    alert("알 수 없는 오류가 발생했습니다.");
+  }
+}
+
+function* unlikePost(action) {
+  const { response, error } = yield call(unlikePostAPI, action.payload);
+  if (response) {
+    yield put({
+      type: UNLIKE_POST_SUCCESS
+    });
+    alert(response.data);
+  } else if (error) {
+    console.error(error);
+    yield put({
+      type: UNLIKE_POST_FAILURE,
+      error
+    });
+  } else {
+    console.error(error);
+    alert("알 수 없는 오류가 발생했습니다.");
+  }
+}
 // 포스트 추가
 function* watchAddPost() {
   yield takeEvery(ADD_POST_REQUEST, addPost);
@@ -240,6 +306,14 @@ function* watchAddComment() {
 function* watchUploadImage() {
   yield takeEvery(UPLOAD_IMAGES_REQUEST, uploadImage);
 }
+// 좋아요
+function* watchLikePost() {
+  yield takeEvery(LIKE_POST_REQUEST, likePost);
+}
+// 좋아요 취소
+function* watchUnlikePost() {
+  yield takeEvery(UNLIKE_POST_REQUEST, unlikePost);
+}
 export default function*() {
   yield all([
     fork(watchAddPost),
@@ -248,6 +322,8 @@ export default function*() {
     fork(watchLoadHashtagPost),
     fork(watchLoadUserPost),
     fork(watchAddComment),
-    fork(watchUploadImage)
+    fork(watchUploadImage),
+    fork(watchLikePost),
+    fork(watchUnlikePost)
   ]);
 }

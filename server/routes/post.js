@@ -153,7 +153,7 @@ router.get("/:id/comments", async (req, res, next) => {
     next(e);
   }
 });
-
+// 포스트의 이미지 업로드
 router.post("/upload", (req, res) => {
   // 지정한 경로에 파일 업로드
   if (req.files) {
@@ -174,6 +174,32 @@ router.post("/upload", (req, res) => {
     } else {
       return res.status(401).send("이미지 형식은 png 또는 jpg만 가능합니다.");
     }
+  }
+});
+
+router.post("/:id/like", isLoggedIn, async (req, res, next) => {
+  try {
+    // 선작업: 해당 포스트가 존재하는지 확인
+    const post = await db.Post.findOne({ where: { id: req.params.id } });
+    if (!post) return res.status(404).send("포스트가 존재하지 않습니다.");
+    await post.addLiker(req.user.id);
+    res.status(200).send("좋아요");
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+
+router.delete("/:id/like", isLoggedIn, async (req, res, next) => {
+  try {
+    // 선작업: 해당 포스트가 존재하는지 확인
+    const post = await db.Post.findOne({ where: { id: req.params.id } });
+    if (!post) return res.status(404).send("포스트가 존재하지 않습니다.");
+    await post.removeLiker(req.user.id);
+    res.status(200).send("좋아요 취소");
+  } catch (e) {
+    console.error(e);
+    next(e);
   }
 });
 module.exports = router;

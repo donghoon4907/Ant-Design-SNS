@@ -69,7 +69,9 @@ export const initialState = {
   userInfo: null, // 유저 정보
   addCommentError: "", // 포스트 댓글 추가 요청 실패 사유
   uploadError: "", // 업로드 요청 실패 사유
-  loadUserInfoError: "" // 유저 정보 요청 실패 사유
+  loadUserInfoError: "", // 유저 정보 요청 실패 사유
+  likePostError: "", // 포스트 좋아요 요청 실패 사유
+  unlikePostError: "" // 포스트 좋아요 취소 요청 실패 사유
 };
 
 export default (state = initialState, action) => {
@@ -209,6 +211,38 @@ export default (state = initialState, action) => {
       return {
         ...state,
         images: state.images.filter((image, idx) => idx !== action.payload)
+      };
+    }
+    case LIKE_POST_REQUEST: {
+      return {
+        ...state
+      };
+    }
+    case LIKE_POST_SUCCESS: {
+      return {
+        ...state
+      };
+    }
+    case LIKE_POST_FAILURE: {
+      return {
+        ...state,
+        likePostError: action.error
+      };
+    }
+    case UNLIKE_POST_REQUEST: {
+      return {
+        ...state
+      };
+    }
+    case UNLIKE_POST_SUCCESS: {
+      return {
+        ...state
+      };
+    }
+    case UNLIKE_POST_FAILURE: {
+      return {
+        ...state,
+        unlikePostError: action.error
       };
     }
     default:

@@ -1,18 +1,40 @@
-import React, { useCallback, useState, useRef } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { ADD_COMMENT_REQUEST } from "../../reducers/post";
+import {
+  ADD_COMMENT_REQUEST,
+  LIKE_POST_REQUEST,
+  UNLIKE_POST_REQUEST
+} from "../../reducers/post";
 import PostPresentation from "./PostPresentation";
 
 const PostContainer = ({ post }) => {
+  console.log(post);
   const dispatch = useDispatch();
   const commentRef = useRef(null);
   const [commentCount, setCommentCount] = useState(post.Comments.length);
   const [currentCommentArr, setCurrentCommentArr] = useState([]);
   const { loadUserData } = useSelector(state => state.user);
   const { isAddComment } = useSelector(state => state.post);
+  const [isLike, setIsLike] = useState(false);
 
+  const onLike = useCallback(() => {
+    // 로그인한 유저가 해당 포스트를 좋아요한 경우
+    if (post.Likers && post.Likers.find(v => v.id === loadUserData.id)) {
+      setIsLike(false);
+      dispatch({
+        type: UNLIKE_POST_REQUEST,
+        payload: post.id
+      });
+    } else {
+      setIsLike(true);
+      dispatch({
+        type: LIKE_POST_REQUEST,
+        payload: post.id
+      });
+    }
+  }, [isLike]);
   const onSubmit = useCallback(
     e => {
       e.preventDefault();
@@ -74,35 +96,26 @@ const PostContainer = ({ post }) => {
       )),
     [currentCommentArr]
   );
-
-  const mapToImages = useCallback(
-    () =>
-      post.Images.length !== 0 &&
-      post.Images.map((image, idx) => (
-        <img
-          key={`postImage${idx + 1}`}
-          src={`http://localhost:3001/${image.src}`}
-          alt="load error"
-          style={{
-            width: "100%",
-            height: "500px",
-            marginTop: "5px"
-          }}
-        />
-      )),
-    []
-  );
+  useEffect(() => {
+    if (
+      post.Likers &&
+      post.Likers.find(liker => liker.id === loadUserData.id)
+    ) {
+      setIsLike(true);
+    }
+  });
   return (
     <PostPresentation
       post={post}
       loadUserData={loadUserData}
       commentCount={commentCount}
       isAddComment={isAddComment}
+      isLike={isLike}
       commentRef={commentRef}
       mapToDescription={mapToDescription}
       mapToComment={mapToComment}
       mapToAddComment={mapToAddComment}
-      mapToImages={mapToImages}
+      onLike={onLike}
       onSubmit={onSubmit}
       loggedInUser={loadUserData.userId}
     />
@@ -121,6 +134,8 @@ PostContainer.propTypes = {
       id: PropTypes.number.isRequired
     }),
     Comments: PropTypes.array.isRequired,
-    Images: PropTypes.array.isRequired
+    Images: PropTypes.arrayOf(PropTypes.shape({ src: PropTypes.string }))
+      .isRequired,
+    Likers: PropTypes.array
   })
 };
