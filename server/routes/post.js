@@ -26,6 +26,25 @@ router.get("/load", async (req, res, next) => {
         {
           model: db.Image,
           attributes: ["src"]
+        },
+        {
+          model: db.User,
+          as: "Likers",
+          attributes: ["id"]
+        },
+        {
+          model: db.Post,
+          as: "Retweet",
+          include: [
+            {
+              model: db.User,
+              attributes: ["id", "userId", "thumbnail"]
+            },
+            {
+              model: db.Image,
+              attributes: ["src"]
+            }
+          ]
         }
       ],
       order: [["createdAt", "DESC"]] // DESC는 내림차순, ASC는 오름차순
@@ -76,10 +95,11 @@ router.post("/add", isLoggedIn, async (req, res, next) => {
       include: [
         {
           model: db.User,
-          attributes: ["id", "userId", "thumbnail"]
+          attributes: ["id", "userId", "thumbnail", "createdAt"]
         },
         {
           model: db.Comment,
+          attributes: ["id", "content", "createdAt"],
           include: [
             {
               model: db.User,
@@ -90,6 +110,25 @@ router.post("/add", isLoggedIn, async (req, res, next) => {
         {
           model: db.Image,
           attributes: ["src"]
+        },
+        {
+          model: db.User,
+          as: "Likers",
+          attributes: ["id"]
+        },
+        {
+          model: db.Post,
+          as: "Retweet",
+          include: [
+            {
+              model: db.User,
+              attributes: ["id", "userId", "thumbnail"]
+            },
+            {
+              model: db.Image,
+              attributes: ["src"]
+            }
+          ]
         }
       ]
     });
@@ -176,7 +215,7 @@ router.post("/upload", (req, res) => {
     }
   }
 });
-
+// 좋아요
 router.post("/:id/like", isLoggedIn, async (req, res, next) => {
   try {
     // 선작업: 해당 포스트가 존재하는지 확인
@@ -189,7 +228,7 @@ router.post("/:id/like", isLoggedIn, async (req, res, next) => {
     next(e);
   }
 });
-
+// 좋아요 취소
 router.delete("/:id/like", isLoggedIn, async (req, res, next) => {
   try {
     // 선작업: 해당 포스트가 존재하는지 확인
@@ -197,6 +236,84 @@ router.delete("/:id/like", isLoggedIn, async (req, res, next) => {
     if (!post) return res.status(404).send("포스트가 존재하지 않습니다.");
     await post.removeLiker(req.user.id);
     res.status(200).send("좋아요 취소");
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+// 리트윗
+router.post("/:id/retweet", isLoggedIn, async (req, res, next) => {
+  const post = await db.Post.findOne({ where: { id: req.params.id } });
+  // 포스트가 없는 경우
+  if (!post) {
+    return res.status(403).send("포스트가 존재하지 않습니다.");
+  }
+  // 자신의 포스트를 리트윗한 경우
+  if (
+    req.user.id === post.UserId ||
+    (post.Retweet && post.Retweet.UserId === req.user.id)
+  ) {
+    return res.status(403).send("자신의 글은 리트윗할 수 없습니다.");
+  }
+  const retweetTargetId = post.RetweetId || post.id;
+  const exPost = await db.Post.findOne({
+    where: { UserId: req.user.id, RetweetId: retweetTargetId }
+  });
+  // 이전에 리트윗을 한 경우
+  if (exPost) {
+    return res.status(403).send("이미 리트윗 했습니다.");
+  }
+  const retweet = await db.Post.create({
+    UserId: req.user.id,
+    RetweetId: retweetTargetId,
+    title: "retweet",
+    content: "retweet"
+  });
+  const retweetWithPrevPost = await db.Post.findOne({
+    where: { id: retweet.id },
+    include: [
+      {
+        model: db.User,
+        attributes: ["id", "userId", "thumbnail", "createdAt"]
+      },
+      {
+        model: db.Comment,
+        attributes: ["id", "content", "createdAt"],
+        include: [
+          {
+            model: db.User,
+            attributes: ["userId"]
+          }
+        ]
+      },
+      {
+        model: db.Image,
+        attributes: ["src"]
+      },
+      {
+        model: db.User,
+        as: "Likers",
+        attributes: ["id"]
+      },
+      {
+        model: db.Post,
+        as: "Retweet",
+        include: [
+          {
+            model: db.User,
+            attributes: ["id", "userId", "thumbnail"]
+          },
+          {
+            model: db.Image,
+            attributes: ["src"]
+          }
+        ]
+      }
+    ],
+    order: [["createdAt", "DESC"]] // DESC는 내림차순, ASC는 오름차순
+  });
+  res.json(retweetWithPrevPost);
+  try {
   } catch (e) {
     console.error(e);
     next(e);

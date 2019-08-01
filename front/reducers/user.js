@@ -134,6 +134,36 @@ export default (state = initialState, action) => {
         loadUserErrorReason: action.error
       };
     }
+    case FOLLOW_USER_REQUEST: {
+      return {
+        ...state
+      };
+    }
+    case FOLLOW_USER_SUCCESS: {
+      return {
+        ...state
+      };
+    }
+    case FOLLOW_USER_FAILURE: {
+      return {
+        ...state
+      };
+    }
+    case UNFOLLOW_USER_REQUEST: {
+      return {
+        ...state
+      };
+    }
+    case UNFOLLOW_USER_SUCCESS: {
+      return {
+        ...state
+      };
+    }
+    case UNFOLLOW_USER_FAILURE: {
+      return {
+        ...state
+      };
+    }
     default:
       return state;
   }

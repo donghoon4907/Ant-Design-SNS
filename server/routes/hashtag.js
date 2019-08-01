@@ -26,6 +26,29 @@ router.get("/:tag", async (req, res, next) => {
               // after: 비밀번호를 제외한 필드만 가져오도록 attr 설정하기
             }
           ]
+        },
+        {
+          model: db.Image,
+          attributes: ["src"]
+        },
+        {
+          model: db.User,
+          as: "Likers",
+          attributes: ["id"]
+        },
+        {
+          model: db.Post,
+          as: "Retweet",
+          include: [
+            {
+              model: db.User,
+              attributes: ["id", "userId"]
+            },
+            {
+              model: db.Image,
+              attributes: ["src"]
+            }
+          ]
         }
       ]
     });

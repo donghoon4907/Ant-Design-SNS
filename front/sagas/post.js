@@ -26,7 +26,10 @@ import {
   LIKE_POST_FAILURE,
   UNLIKE_POST_REQUEST,
   UNLIKE_POST_SUCCESS,
-  UNLIKE_POST_FAILURE
+  UNLIKE_POST_FAILURE,
+  RETWEET_REQUEST,
+  RETWEET_SUCCESS,
+  RETWEET_FAILURE
 } from "../reducers/post";
 import axios from "axios";
 
@@ -109,6 +112,19 @@ function unlikePostAPI(postId) {
     .catch(error => ({ error }));
 }
 
+function retweetAPI(postId) {
+  return axios
+    .post(
+      `/post/${postId}/retweet`,
+      {},
+      {
+        withCredentials: true
+      }
+    )
+    .then(response => ({ response }))
+    .catch(error => ({ error }));
+}
+
 function* addPost(action) {
   const { response, error } = yield call(addPostAPI, action.payload);
   if (response) {
@@ -116,14 +132,13 @@ function* addPost(action) {
       type: ADD_POST_SUCCESS,
       payload: response.data
     });
-    alert("포스트 작성 성공");
   } else if (error) {
     console.error(error);
     yield put({
       type: ADD_POST_FAILURE,
       error
     });
-    alert(error);
+    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -135,13 +150,13 @@ function* removePost() {
     yield put({
       type: REMOVE_POST_SUCCESS
     });
-    alert("포스트 삭제 성공");
   } catch (e) {
     console.error(e);
     yield put({
       type: REMOVE_POST_FAILURE,
       error: e
     });
+    alert(e.response.data);
   }
 }
 
@@ -158,6 +173,7 @@ function* loadPost() {
       type: LOAD_MAIN_POST_FAILURE,
       error
     });
+    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -177,6 +193,7 @@ function* loadHashTagPost(action) {
       type: LOAD_HASHTAG_POST_FAILURE,
       error
     });
+    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -196,6 +213,7 @@ function* loadUserPost(action) {
       type: LOAD_USER_POST_FAILURE,
       error
     });
+    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -208,13 +226,13 @@ function* addComment(action) {
     yield put({
       type: ADD_COMMENT_SUCCESS
     });
-    alert("댓글 작성 완료");
   } else if (error) {
     console.error(error);
     yield put({
       type: ADD_COMMENT_FAILURE,
       error
     });
+    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -228,13 +246,13 @@ function* uploadImage(action) {
       type: UPLOAD_IMAGES_SUCCESS,
       payload: response.data
     });
-    alert("이미지 업로드 완료");
   } else if (error) {
     console.error(error);
     yield put({
       type: UPLOAD_IMAGES_FAILURE,
       error
     });
+    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -247,13 +265,13 @@ function* likePost(action) {
     yield put({
       type: LIKE_POST_SUCCESS
     });
-    alert(response.data);
   } else if (error) {
     console.error(error);
     yield put({
       type: LIKE_POST_FAILURE,
       error
     });
+    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -266,18 +284,40 @@ function* unlikePost(action) {
     yield put({
       type: UNLIKE_POST_SUCCESS
     });
-    alert(response.data);
   } else if (error) {
     console.error(error);
     yield put({
       type: UNLIKE_POST_FAILURE,
       error
     });
+    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
   }
 }
+
+function* retweet(action) {
+  const { response, error } = yield call(retweetAPI, action.payload);
+  if (response) {
+    yield put({
+      type: RETWEET_SUCCESS,
+      payload: response.data
+    });
+    window.scroll({ top: 0, behavior: "smooth" });
+  } else if (error) {
+    console.error(error);
+    yield put({
+      type: RETWEET_FAILURE,
+      error
+    });
+    alert(error.response.data);
+  } else {
+    console.error(error);
+    alert("알 수 없는 오류가 발생했습니다.");
+  }
+}
+
 // 포스트 추가
 function* watchAddPost() {
   yield takeEvery(ADD_POST_REQUEST, addPost);
@@ -314,6 +354,11 @@ function* watchLikePost() {
 function* watchUnlikePost() {
   yield takeEvery(UNLIKE_POST_REQUEST, unlikePost);
 }
+// 리트윗
+function* watchRetweet() {
+  yield takeEvery(RETWEET_REQUEST, retweet);
+}
+
 export default function*() {
   yield all([
     fork(watchAddPost),
@@ -324,6 +369,7 @@ export default function*() {
     fork(watchAddComment),
     fork(watchUploadImage),
     fork(watchLikePost),
-    fork(watchUnlikePost)
+    fork(watchUnlikePost),
+    fork(watchRetweet)
   ]);
 }

@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import {
   StyledButton,
@@ -35,7 +35,7 @@ const LoginPresentation = ({
   </StyledForm>
 );
 
-export default memo(LoginPresentation);
+export default LoginPresentation;
 
 LoginPresentation.propTypes = {
   onSubmit: PropTypes.func.isRequired,

@@ -12,7 +12,6 @@ const AddPostPresentation = ({
   onCancel,
   onChangeContent,
   onChangeTitle,
-  onSubmit,
   onClickUpload,
   onChangeUpload
 }) => (
@@ -25,7 +24,7 @@ const AddPostPresentation = ({
       okText="작성"
       cancelText="취소"
     >
-      <Form encType="multipart/form-data" onSubmit={onSubmit}>
+      <Form encType="multipart/form-data">
         <div>
           <label htmlFor="add-post-title">제목</label>
           <br />
@@ -49,7 +48,7 @@ const AddPostPresentation = ({
         <div>
           <input type="file" ref={imageRef} onChange={onChangeUpload} hidden />
           <Button onClick={onClickUpload}>이미지 업로드</Button>
-          {mapToImages()}
+          {mapToImages.call(this)}
           <div />
         </div>
       </Form>
@@ -72,7 +71,6 @@ AddPostPresentation.propTypes = {
   onCancel: PropTypes.func.isRequired,
   onChangeContent: PropTypes.func.isRequired,
   onChangeTitle: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func.isRequired,
   onClickUpload: PropTypes.func.isRequired,
   onChangeUpload: PropTypes.func.isRequired
 };

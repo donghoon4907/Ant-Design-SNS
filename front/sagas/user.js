@@ -12,7 +12,13 @@ import {
   LOG_OUT_FAILURE,
   LOAD_USER_REQUEST,
   LOAD_USER_SUCCESS,
-  LOAD_USER_FAILURE
+  LOAD_USER_FAILURE,
+  FOLLOW_USER_REQUEST,
+  FOLLOW_USER_SUCCESS,
+  FOLLOW_USER_FAILURE,
+  UNFOLLOW_USER_REQUEST,
+  UNFOLLOW_USER_SUCCESS,
+  UNFOLLOW_USER_FAILURE
 } from "../reducers/user";
 
 function logInAPI(userData) {
@@ -56,6 +62,24 @@ function loadUserAPI(userId) {
     })
     .then(response => ({ response }))
     .catch(error => ({ error: error.response }));
+}
+
+function followAPI(userId) {
+  return axios
+    .get(`/user/${userId}/follow`, {
+      withCredentials: true
+    })
+    .then(response => ({ response }))
+    .catch(error => ({ error }));
+}
+
+function unfollowAPI(userId) {
+  return axios
+    .delete(`/user/${userId}/follow`, {
+      withCredentials: true
+    })
+    .then(response => ({ response }))
+    .catch(error => ({ error }));
 }
 
 function* logIn(action) {
@@ -128,6 +152,7 @@ function* loadUser(action) {
       payload: response.data,
       me: action.payload
     });
+    console.log(response.data);
   } else if (error) {
     console.error(error);
     yield put({
@@ -141,28 +166,76 @@ function* loadUser(action) {
   }
 }
 
+function* follow(action) {
+  const { response, error } = yield call(followAPI, action.payload);
+  if (response) {
+    yield put({
+      type: FOLLOW_USER_SUCCESS
+    });
+  } else if (error) {
+    console.error(error);
+    yield put({
+      type: FOLLOW_USER_FAILURE,
+      error
+    });
+    alert(error.response.data);
+  } else {
+    console.error(error);
+    alert("알 수 없는 오류가 발생했습니다.");
+  }
+}
+
+function* unfollow(action) {
+  const { response, error } = yield call(unfollowAPI, action.payload);
+  if (response) {
+    yield put({
+      type: UNFOLLOW_USER_SUCCESS
+    });
+  } else if (error) {
+    console.error(error);
+    yield put({
+      type: UNFOLLOW_USER_FAILURE,
+      error
+    });
+    alert(error.response.data);
+  } else {
+    console.error(error);
+    alert("알 수 없는 오류가 발생했습니다.");
+  }
+}
+
+//로그인
 function* watchLogIn() {
   yield takeEvery(LOG_IN_REQUEST, logIn);
 }
-
+// 회원가입
 function* watchSignUp() {
   yield takeEvery(SIGN_UP_REQUEST, signUp);
 }
-
+// 로그아웃
 function* watchLogOut() {
   yield takeEvery(LOG_OUT_REQUEST, logOut);
 }
-
+// 유저정보 로드
 function* watchLoadUser() {
   yield takeEvery(LOAD_USER_REQUEST, loadUser);
 }
-
+// 팔로우
+function* watchFollow() {
+  yield takeEvery(FOLLOW_USER_REQUEST, follow);
+}
+// 언팔로우
+function* watchUnfollow() {
+  yield takeEvery(UNFOLLOW_USER_REQUEST, unfollow);
+}
 export default function*() {
   yield all([
     fork(watchLogIn),
     fork(watchSignUp),
     fork(watchLogOut),
-    fork(watchLoadUser)
+    fork(watchLoadUser),
+    fork(watchFollow),
+    fork(watchUnfollow)
   ]);
 }
 

@@ -5,36 +5,72 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   ADD_COMMENT_REQUEST,
   LIKE_POST_REQUEST,
-  UNLIKE_POST_REQUEST
+  UNLIKE_POST_REQUEST,
+  RETWEET_REQUEST
 } from "../../reducers/post";
+import {
+  FOLLOW_USER_REQUEST,
+  UNFOLLOW_USER_REQUEST
+} from "../../reducers/user";
 import PostPresentation from "./PostPresentation";
 
 const PostContainer = ({ post }) => {
-  console.log(post);
   const dispatch = useDispatch();
   const commentRef = useRef(null);
-  const [commentCount, setCommentCount] = useState(post.Comments.length);
+  const [commentCount, setCommentCount] = useState(
+    post && post.Comments.length
+  );
   const [currentCommentArr, setCurrentCommentArr] = useState([]);
+  const [likeCount, setLikeCount] = useState(post && post.Likers.length);
   const { loadUserData } = useSelector(state => state.user);
   const { isAddComment } = useSelector(state => state.post);
   const [isLike, setIsLike] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
 
+  const onFollow = useCallback(
+    userId => () => {
+      setIsFollowing(true);
+      dispatch({
+        type: FOLLOW_USER_REQUEST,
+        payload: userId
+      });
+    },
+    []
+  );
+  const onUnfollow = useCallback(
+    userId => () => {
+      setIsFollowing(false);
+      dispatch({
+        type: UNFOLLOW_USER_REQUEST,
+        payload: userId
+      });
+    },
+    []
+  );
+  const onRetweet = useCallback(() => {
+    dispatch({
+      type: RETWEET_REQUEST,
+      payload: post.id
+    });
+  }, [post.id]);
   const onLike = useCallback(() => {
     // 로그인한 유저가 해당 포스트를 좋아요한 경우
-    if (post.Likers && post.Likers.find(v => v.id === loadUserData.id)) {
+    if (isLike) {
       setIsLike(false);
+      setLikeCount(likeCount - 1);
       dispatch({
         type: UNLIKE_POST_REQUEST,
         payload: post.id
       });
     } else {
       setIsLike(true);
+      setLikeCount(likeCount + 1);
       dispatch({
         type: LIKE_POST_REQUEST,
         payload: post.id
       });
     }
-  }, [isLike]);
+  }, [isLike, post && post.id]);
   const onSubmit = useCallback(
     e => {
       e.preventDefault();
@@ -103,22 +139,34 @@ const PostContainer = ({ post }) => {
     ) {
       setIsLike(true);
     }
-  });
+    if (
+      loadUserData &&
+      loadUserData.User.Followings.find(v => v.id === post.User.id)
+    ) {
+      setIsFollowing(true);
+    }
+  }, [loadUserData && loadUserData]);
   return (
-    <PostPresentation
-      post={post}
-      loadUserData={loadUserData}
-      commentCount={commentCount}
-      isAddComment={isAddComment}
-      isLike={isLike}
-      commentRef={commentRef}
-      mapToDescription={mapToDescription}
-      mapToComment={mapToComment}
-      mapToAddComment={mapToAddComment}
-      onLike={onLike}
-      onSubmit={onSubmit}
-      loggedInUser={loadUserData.userId}
-    />
+    loadUserData && (
+      <PostPresentation
+        post={post}
+        likeCount={likeCount}
+        commentCount={commentCount}
+        loadUserData={loadUserData.id}
+        isAddComment={isAddComment}
+        isLike={isLike}
+        isFollowing={isFollowing}
+        commentRef={commentRef}
+        mapToDescription={mapToDescription}
+        mapToComment={mapToComment}
+        mapToAddComment={mapToAddComment}
+        onLike={onLike}
+        onSubmit={onSubmit}
+        onRetweet={onRetweet}
+        onFollow={onFollow}
+        onUnfollow={onUnfollow}
+      />
+    )
   );
 };
 

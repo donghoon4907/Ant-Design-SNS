@@ -14,7 +14,7 @@ const LayoutContainer = ({ children }) => {
     dispatch({
       type: LOG_OUT_REQUEST
     });
-  });
+  }, []);
   useEffect(() => {
     setLoad(false);
     dispatch({

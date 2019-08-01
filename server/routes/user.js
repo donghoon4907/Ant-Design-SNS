@@ -88,9 +88,25 @@ router.post("/logout", isLoggedIn, (req, res) => {
   res.send("로그아웃 성공");
 });
 // 로그인 성공한 이후 쿠키에 기록된 사용자 정보를 클라이언트에 전달, deserialize => router
-router.get("/loadUser", isLoggedIn, (req, res) => {
+router.get("/loadUser", isLoggedIn, async (req, res) => {
   // 서버에 저장된 쿠키 정보를 가진 사용자가 로그인한 경우 passport의 deserialize를 거쳐 생성된 사용자 정보를 전달
   const result = Object.assign({}, req.user.toJSON());
+  try {
+    const user = await db.User.findOne({
+      where: { id: result.id },
+      attributes: ["id"],
+      include: [
+        {
+          model: db.User,
+          as: "Followings"
+        }
+      ]
+    });
+    result.User = user;
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
   delete result.password;
   return res.json(result);
 });
@@ -142,6 +158,28 @@ router.get("/:id", async (req, res, next) => {
     jsonUser.Followings = jsonUser.Followings ? jsonUser.Followings.length : 0;
     jsonUser.Followers = jsonUser.Followers ? jsonUser.Followers.length : 0;
     res.json(jsonUser);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+// 팔로우
+router.get("/:id/follow", async (req, res, next) => {
+  try {
+    const me = await db.User.findOne({ where: { id: req.user.id } });
+    await me.addFollowing(req.params.id);
+    res.send("팔로우 성공");
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+// 언팔로우
+router.delete("/:id/follow", async (req, res, next) => {
+  try {
+    const me = await db.User.findOne({ where: { id: req.user.id } });
+    await me.removeFollowing(req.params.id);
+    res.send("언팔로우 성공");
   } catch (e) {
     console.error(e);
     next(e);

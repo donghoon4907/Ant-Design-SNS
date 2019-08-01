@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 import { Checkbox, Avatar } from "antd";
 import PropTypes from "prop-types";
 import { ThumbnailContainer, Thumbnail } from "./SignUpStyledComponent";
@@ -85,7 +85,7 @@ const SignUpPresentation = ({
   </StyledForm>
 );
 
-export default memo(SignUpPresentation);
+export default SignUpPresentation;
 
 SignUpPresentation.propTypes = {
   onClick: PropTypes.func.isRequired,

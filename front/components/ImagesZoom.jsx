@@ -42,7 +42,7 @@ const ImagesZoom = ({ images, onClose }) => {
             slidesToShow={1}
             slidesToScroll={1}
           >
-            {mapToImages()}
+            {mapToImages.call(this)}
           </Slick>
           <PageNumContainer>
             <PageNumber>

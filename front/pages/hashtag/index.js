@@ -26,7 +26,7 @@ const HashTag = ({ tag }) => {
       payload: tag
     });
   }, [tag]);
-  return <div>{mapToComponent()}</div>;
+  return <div>{mapToComponent.call(this)}</div>;
 };
 
 // getInitialProps: componentDidMount보다 먼저 발생, 클라이언트 및 서버에서 동작, 서버사이드 렌더링(서버쪽에서 데이터를 받은 이후 렌더링하는 경우)

@@ -36,17 +36,17 @@ const PostImages = ({ images }) => {
       <>
         <div>
           <StyledImg
+            check
             src={`http://localhost:3001/${images[0].src}`}
             alt="load error"
             onClick={onZoom}
           />
-          ;
           <StyledImg
+            check
             src={`http://localhost:3001/${images[1].src}`}
             alt="load error"
             onClick={onZoom}
           />
-          ;
         </div>
         {showImagesZoom && <ImagesZoom images={images} onClose={onClose} />}
       </>

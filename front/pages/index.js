@@ -41,7 +41,7 @@ const Main = () => {
           새 포스트
         </Button>
       </div>
-      {mapToComponent()}
+      {mapToComponent.call(this)}
     </div>
   );
 };

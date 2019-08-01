@@ -21,9 +21,6 @@ const AddPostContainer = ({ visible, setVisible }) => {
   const onChangeContent = useCallback(e => {
     setContent(e.target.value);
   }, []);
-  const onSubmit = useCallback(e => {
-    e.preventDefault();
-  }, []);
   const onConfirm = useCallback(() => {
     dispatch({
       type: ADD_POST_REQUEST,
@@ -85,7 +82,6 @@ const AddPostContainer = ({ visible, setVisible }) => {
       onCancel={onCancel}
       onChangeContent={onChangeContent}
       onChangeTitle={onChangeTitle}
-      onSubmit={onSubmit}
       onClickUpload={onClickUpload}
       onChangeUpload={onChangeUpload}
     />

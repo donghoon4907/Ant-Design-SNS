@@ -57,3 +57,11 @@ Ant Design, Next.js, express, mysql redux-saga
 1. 상세이미지 구현(react-slick)
 
 - after: 포스트 수정, 삭제, multer 연구, 좋아요 부분 다시 확인 DB까지는 저장됨
+
+20190801
+
+1. 리트윗 구현
+2. 팔로우 / 언팔로우 구현
+3. 좋아요 / 좋아요 취소 구현
+
+- after: 포스트 수정, 삭제, multer 연구
