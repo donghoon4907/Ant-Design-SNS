@@ -1,4 +1,11 @@
-import { all, fork, takeEvery, call, put } from "redux-saga/effects";
+import {
+  all,
+  fork,
+  takeEvery,
+  takeLatest,
+  call,
+  put
+} from "redux-saga/effects";
 import axios from "axios";
 import {
   LOG_IN_REQUEST,
@@ -18,7 +25,19 @@ import {
   FOLLOW_USER_FAILURE,
   UNFOLLOW_USER_REQUEST,
   UNFOLLOW_USER_SUCCESS,
-  UNFOLLOW_USER_FAILURE
+  UNFOLLOW_USER_FAILURE,
+  LOAD_FOLLOWERS_REQUEST,
+  LOAD_FOLLOWERS_SUCCESS,
+  LOAD_FOLLOWERS_FAILURE,
+  LOAD_FOLLOWINGS_REQUEST,
+  LOAD_FOLLOWINGS_SUCCESS,
+  LOAD_FOLLOWINGS_FAILURE,
+  REMOVE_FOLLOWER_REQUEST,
+  REMOVE_FOLLOWER_SUCCESS,
+  REMOVE_FOLLOWER_FAILURE,
+  EDIT_USERID_REQUEST,
+  EDIT_USERID_SUCCESS,
+  EDIT_USERID_FAILURE
 } from "../reducers/user";
 
 function logInAPI(userData) {
@@ -27,7 +46,7 @@ function logInAPI(userData) {
       withCredentials: true
     })
     .then(response => ({ response }))
-    .catch(error => ({ error: error.response }));
+    .catch(error => ({ error }));
 }
 
 function signUpAPI(userData) {
@@ -40,7 +59,7 @@ function signUpAPI(userData) {
   return axios
     .post("/user/add", formData)
     .then(response => ({ response }))
-    .catch(error => ({ error: error.response }));
+    .catch(error => ({ error }));
 }
 
 function logOutAPI() {
@@ -61,7 +80,7 @@ function loadUserAPI(userId) {
       withCredentials: true
     })
     .then(response => ({ response }))
-    .catch(error => ({ error: error.response }));
+    .catch(error => ({ error }));
 }
 
 function followAPI(userId) {
@@ -82,9 +101,50 @@ function unfollowAPI(userId) {
     .catch(error => ({ error }));
 }
 
+function loadFollowersAPI(userId) {
+  return axios
+    .get(`/user/${userId}/followers`, {
+      withCredentials: true
+    })
+    .then(response => ({ response }))
+    .catch(error => ({ error }));
+}
+
+function loadFollowingsAPI(userId) {
+  return axios
+    .get(`/user/${userId}/followings`, {
+      withCredentials: true
+    })
+    .then(response => ({ response }))
+    .catch(error => ({ error }));
+}
+
+function removeFollowerAPI(userId) {
+  return axios
+    .delete(`/user/${userId}/follower`, {
+      withCredentials: true
+    })
+    .then(response => ({ response }))
+    .catch(error => ({ error }));
+}
+
+function editUserIdAPI(userId) {
+  // 유저 정보 중 유저명 처럼 부분적인 수정 요청 시 patch
+  return axios
+    .patch(
+      "/user/editUserId",
+      { userId },
+      {
+        withCredentials: true
+      }
+    )
+    .then(response => ({ response }))
+    .catch(error => ({ error }));
+}
+
 function* logIn(action) {
   const { response, error } = yield call(logInAPI, action.payload);
-  if (response && response.status === 200) {
+  if (response) {
     yield put({
       type: LOG_IN_SUCCESS,
       payload: response.data
@@ -94,12 +154,11 @@ function* logIn(action) {
     });
     alert("로그인 성공");
   } else if (error) {
-    console.error(error);
     yield put({
       type: LOG_IN_FAILURE,
       error
     });
-    alert(error.data);
+    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -108,19 +167,18 @@ function* logIn(action) {
 
 function* signUp(action) {
   const { response, error } = yield call(signUpAPI, action.payload);
-  if (response && response.status === 200) {
+  if (response) {
     yield put({
       type: SIGN_UP_SUCCESS
     });
-    alert("회원가입 성공.");
+    alert("회원가입 성공. 로그인 페이지로 이동합니다.");
     action.payload.successEvent.call(null);
   } else if (error) {
-    console.error(error);
     yield put({
       type: SIGN_UP_FAILURE,
       error
     });
-    alert(error.data);
+    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -135,31 +193,27 @@ function* logOut() {
       type: LOG_OUT_SUCCESS
     });
   } catch (e) {
-    console.error(e);
-    alert("로그아웃 실패, 잠시후 다시 시도하세요.");
     yield put({
       type: LOG_OUT_FAILURE,
       error: e
     });
+    alert("로그아웃 실패, 잠시후 다시 시도하세요.");
   }
 }
 
 function* loadUser(action) {
   const { response, error } = yield call(loadUserAPI, action.payload);
-  if (response && response.status === 200) {
+  if (response) {
     yield put({
       type: LOAD_USER_SUCCESS,
       payload: response.data,
       me: action.payload
     });
-    console.log(response.data);
   } else if (error) {
-    console.error(error);
     yield put({
       type: LOAD_USER_FAILURE,
       error
     });
-    alert(error.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -170,10 +224,10 @@ function* follow(action) {
   const { response, error } = yield call(followAPI, action.payload);
   if (response) {
     yield put({
-      type: FOLLOW_USER_SUCCESS
+      type: FOLLOW_USER_SUCCESS,
+      payload: response.data
     });
   } else if (error) {
-    console.error(error);
     yield put({
       type: FOLLOW_USER_FAILURE,
       error
@@ -189,10 +243,10 @@ function* unfollow(action) {
   const { response, error } = yield call(unfollowAPI, action.payload);
   if (response) {
     yield put({
-      type: UNFOLLOW_USER_SUCCESS
+      type: UNFOLLOW_USER_SUCCESS,
+      payload: response.data
     });
   } else if (error) {
-    console.error(error);
     yield put({
       type: UNFOLLOW_USER_FAILURE,
       error
@@ -204,6 +258,80 @@ function* unfollow(action) {
   }
 }
 
+function* loadFollowers(action) {
+  const { response, error } = yield call(loadFollowersAPI, action.payload);
+  if (response) {
+    yield put({
+      type: LOAD_FOLLOWERS_SUCCESS,
+      payload: response.data
+    });
+  } else if (error) {
+    yield put({
+      type: LOAD_FOLLOWERS_FAILURE,
+      error
+    });
+    alert(error.response.data);
+  } else {
+    console.error(error);
+    alert("알 수 없는 오류가 발생했습니다.");
+  }
+}
+
+function* loadFollowings(action) {
+  const { response, error } = yield call(loadFollowingsAPI, action.payload);
+  if (response) {
+    yield put({
+      type: LOAD_FOLLOWINGS_SUCCESS,
+      payload: response.data
+    });
+  } else if (error) {
+    yield put({
+      type: LOAD_FOLLOWINGS_FAILURE,
+      error
+    });
+    alert(error.response.data);
+  } else {
+    console.error(error);
+    alert("알 수 없는 오류가 발생했습니다.");
+  }
+}
+
+function* removeFollower(action) {
+  const { response, error } = yield call(removeFollowerAPI, action.payload);
+  if (response) {
+    yield put({
+      type: REMOVE_FOLLOWER_SUCCESS
+    });
+  } else if (error) {
+    yield put({
+      type: REMOVE_FOLLOWER_FAILURE,
+      error
+    });
+    alert(error.response.data);
+  } else {
+    console.error(error);
+    alert("알 수 없는 오류가 발생했습니다.");
+  }
+}
+
+function* editUserId(action) {
+  const { response, error } = yield call(editUserIdAPI, action.payload);
+  if (response) {
+    yield put({
+      type: EDIT_USERID_SUCCESS,
+      payload: response.data
+    });
+  } else if (error) {
+    yield put({
+      type: EDIT_USERID_FAILURE,
+      error
+    });
+    alert(error.response.data);
+  } else {
+    console.error(error);
+    alert("알 수 없는 오류가 발생했습니다.");
+  }
+}
 //로그인
 function* watchLogIn() {
   yield takeEvery(LOG_IN_REQUEST, logIn);
@@ -218,7 +346,7 @@ function* watchLogOut() {
 }
 // 유저정보 로드
 function* watchLoadUser() {
-  yield takeEvery(LOAD_USER_REQUEST, loadUser);
+  yield takeLatest(LOAD_USER_REQUEST, loadUser);
 }
 // 팔로우
 function* watchFollow() {
@@ -228,6 +356,22 @@ function* watchFollow() {
 function* watchUnfollow() {
   yield takeEvery(UNFOLLOW_USER_REQUEST, unfollow);
 }
+// 팔로워 불러오기
+function* watchLoadFollowers() {
+  yield takeLatest(LOAD_FOLLOWERS_REQUEST, loadFollowers);
+}
+// 팔로잉 불러오기
+function* watchLoadFollowings() {
+  yield takeLatest(LOAD_FOLLOWINGS_REQUEST, loadFollowings);
+}
+// 팔로워 삭제
+function* watchRemoveFollower() {
+  yield takeEvery(REMOVE_FOLLOWER_REQUEST, removeFollower);
+}
+// 유저명 수정
+function* watchEditUserId() {
+  yield takeEvery(EDIT_USERID_REQUEST, editUserId);
+}
 export default function*() {
   yield all([
     fork(watchLogIn),
@@ -235,7 +379,11 @@ export default function*() {
     fork(watchLogOut),
     fork(watchLoadUser),
     fork(watchFollow),
-    fork(watchUnfollow)
+    fork(watchUnfollow),
+    fork(watchLoadFollowers),
+    fork(watchLoadFollowings),
+    fork(watchRemoveFollower), // 현재 미사용
+    fork(watchEditUserId) // 현재 미사용
   ]);
 }
 

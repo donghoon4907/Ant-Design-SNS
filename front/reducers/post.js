@@ -66,7 +66,6 @@ export const initialState = {
   removePostErrorReason: "", // 포스트 삭제 실패 사유
   backupData: null, // 포스트 삭제 요청 시 임시로 저장할 데이터
   backupDataIndex: -1, // 포스트 삭제 전 위치
-  userInfo: null, // 유저 정보
   addCommentError: "", // 포스트 댓글 추가 요청 실패 사유
   uploadError: "", // 업로드 요청 실패 사유
   loadUserInfoError: "", // 유저 정보 요청 실패 사유
@@ -160,8 +159,7 @@ export default (state = initialState, action) => {
     }
     case LOAD_USER_POST_SUCCESS: {
       return {
-        ...state,
-        userInfo: action.payload
+        ...state
       };
     }
     case LOAD_USER_POST_FAILURE: {

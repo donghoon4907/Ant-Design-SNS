@@ -1,12 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Card, Button, Icon, Avatar } from "antd";
+import { Card, Button, Icon, Avatar, Popover } from "antd";
 import Link from "next/link";
 import TextareaAutosize from "react-autosize-textarea";
 import PostImages from "../PostImages";
-
+// 현재 loadUserData는 id값만 가지고 있음.
 const PostPresentation = ({
   post,
+  used,
   likeCount,
   commentCount,
   loadUserData,
@@ -36,6 +37,7 @@ const PostPresentation = ({
       ))
     }
     actions={
+      used !== "USER" &&
       !post.RetweetId && [
         <>
           <Icon
@@ -53,7 +55,23 @@ const PostPresentation = ({
           onClick={onRetweet}
           style={{ cursor: "pointer", fontSize: "30px" }}
         />,
-        <Icon type="ellipsis" style={{ cursor: "pointer", fontSize: "30px" }} />
+        <Popover
+          key="ellipsis"
+          content={
+            <Button.Group>
+              {post.UserId === loadUserData ? (
+                <>
+                  <Button>수정</Button>
+                  <Button type="danger">삭제</Button>
+                </>
+              ) : (
+                <Button>신고</Button>
+              )}
+            </Button.Group>
+          }
+        >
+          <Icon type="ellipsis" />
+        </Popover>
       ]
     }
   >
@@ -185,6 +203,7 @@ PostPresentation.propTypes = {
       content: PropTypes.string.isRequired
     })
   }),
+  used: PropTypes.string,
   likeCount: PropTypes.number,
   commentCount: PropTypes.number.isRequired,
   loadUserData: PropTypes.number.isRequired,

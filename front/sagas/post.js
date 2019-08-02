@@ -133,7 +133,6 @@ function* addPost(action) {
       payload: response.data
     });
   } else if (error) {
-    console.error(error);
     yield put({
       type: ADD_POST_FAILURE,
       error
@@ -168,7 +167,6 @@ function* loadPost() {
       payload: response.data
     });
   } else if (error) {
-    console.error(error);
     yield put({
       type: LOAD_MAIN_POST_FAILURE,
       error
@@ -188,7 +186,6 @@ function* loadHashTagPost(action) {
       payload: response.data
     });
   } else if (error) {
-    console.error(error);
     yield put({
       type: LOAD_HASHTAG_POST_FAILURE,
       error
@@ -208,7 +205,6 @@ function* loadUserPost(action) {
       payload: response.data
     });
   } else if (error) {
-    console.error(error);
     yield put({
       type: LOAD_USER_POST_FAILURE,
       error
@@ -227,7 +223,6 @@ function* addComment(action) {
       type: ADD_COMMENT_SUCCESS
     });
   } else if (error) {
-    console.error(error);
     yield put({
       type: ADD_COMMENT_FAILURE,
       error
@@ -247,7 +242,6 @@ function* uploadImage(action) {
       payload: response.data
     });
   } else if (error) {
-    console.error(error);
     yield put({
       type: UPLOAD_IMAGES_FAILURE,
       error
@@ -266,7 +260,6 @@ function* likePost(action) {
       type: LIKE_POST_SUCCESS
     });
   } else if (error) {
-    console.error(error);
     yield put({
       type: LIKE_POST_FAILURE,
       error
@@ -285,7 +278,6 @@ function* unlikePost(action) {
       type: UNLIKE_POST_SUCCESS
     });
   } else if (error) {
-    console.error(error);
     yield put({
       type: UNLIKE_POST_FAILURE,
       error
@@ -306,7 +298,6 @@ function* retweet(action) {
     });
     window.scroll({ top: 0, behavior: "smooth" });
   } else if (error) {
-    console.error(error);
     yield put({
       type: RETWEET_FAILURE,
       error
@@ -334,7 +325,7 @@ function* watchRemovePost() {
 function* watchLoadHashtagPost() {
   yield takeEvery(LOAD_HASHTAG_POST_REQUEST, loadHashTagPost);
 }
-// 특정 유저가 작성한 포스트 불러오기
+// 특정 유저가 작성한 포스트 불러오기 // 사용되지 않음
 function* watchLoadUserPost() {
   yield takeEvery(LOAD_USER_POST_REQUEST, loadUserPost);
 }

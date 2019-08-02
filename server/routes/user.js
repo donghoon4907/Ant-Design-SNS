@@ -150,11 +150,55 @@ router.get("/:id", async (req, res, next) => {
           attributes: ["id"]
         }
       ],
-      attributes: ["id", "userId"]
+      attributes: ["id", "userId", "thumbnail"]
+    });
+    const post = await db.Post.findOne({
+      where: { UserId: parseInt(req.params.id, 10) },
+      include: [
+        {
+          model: db.User,
+          attributes: ["id", "userId", "thumbnail", "createdAt"]
+        },
+        {
+          model: db.Comment,
+          attributes: ["id", "content", "createdAt"],
+          include: [
+            {
+              model: db.User,
+              attributes: ["userId"]
+            }
+          ]
+        },
+        {
+          model: db.Image,
+          attributes: ["src"]
+        },
+        {
+          model: db.User,
+          as: "Likers",
+          attributes: ["id"]
+        },
+        {
+          model: db.Post,
+          as: "Retweet",
+          include: [
+            {
+              model: db.User,
+              attributes: ["id", "userId", "thumbnail"]
+            },
+            {
+              model: db.Image,
+              attributes: ["src"]
+            }
+          ]
+        }
+      ],
+      order: [["createdAt", "DESC"]] // DESC는 내림차순, ASC는 오름차순
     });
     // 보안을 위해 id값 대신 length를 클라이언트로 보내기
     const jsonUser = user.toJSON();
-    jsonUser.Posts = jsonUser.Posts ? jsonUser.Posts.length : 0;
+    jsonUser.PostsCount = jsonUser.Posts ? jsonUser.Posts.length : 0;
+    jsonUser.Posts = post;
     jsonUser.Followings = jsonUser.Followings ? jsonUser.Followings.length : 0;
     jsonUser.Followers = jsonUser.Followers ? jsonUser.Followers.length : 0;
     res.json(jsonUser);
@@ -168,7 +212,10 @@ router.get("/:id/follow", async (req, res, next) => {
   try {
     const me = await db.User.findOne({ where: { id: req.user.id } });
     await me.addFollowing(req.params.id);
-    res.send("팔로우 성공");
+    const followers = await me.getFollowings({
+      attributes: ["id", "userId", "thumbnail"]
+    });
+    res.json(followers);
   } catch (e) {
     console.error(e);
     next(e);
@@ -179,7 +226,63 @@ router.delete("/:id/follow", async (req, res, next) => {
   try {
     const me = await db.User.findOne({ where: { id: req.user.id } });
     await me.removeFollowing(req.params.id);
-    res.send("언팔로우 성공");
+    res.send(req.params.id);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+// 팔로잉 목록 로드
+router.get("/:id/followings", isLoggedIn, async (req, res, next) => {
+  try {
+    const user = await db.User.findOne({
+      where: { id: parseInt(req.params.id, 10) }
+    });
+    const followers = await user.getFollowings({
+      attributes: ["id", "userId", "thumbnail"]
+    });
+    res.json(followers);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+// 팔로워 목록 로드
+router.get("/:id/followers", isLoggedIn, async (req, res, next) => {
+  try {
+    const user = await db.User.findOne({
+      where: { id: parseInt(req.params.id, 10) }
+    });
+    const followers = await user.getFollowers({
+      attributes: ["id", "userId", "thumbnail"]
+    });
+    res.json(followers);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+// 팔로워 삭제
+router.delete("/:id/follower", isLoggedIn, async (req, res, next) => {
+  try {
+    const user = await db.User.findOne({
+      where: { id: req.user.id }
+    });
+    await user.removeFollower(req.params.id);
+    res.send("팔로워 삭제 성공");
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+// 유저명 수정
+router.patch("/editUser", isLoggedIn, async (req, res, next) => {
+  try {
+    await db.User.update(
+      { userId: req.body.userId },
+      { where: { id: req.user.id } }
+    );
+    res.send(req.body.userId);
   } catch (e) {
     console.error(e);
     next(e);

@@ -12,9 +12,14 @@ import rootSaga from "../sagas";
 import theme from "../theme";
 
 const GlobalStyle = createGlobalStyle`
-::-webkit-scrollbar { 
-  display: none; 
-}
+  @import url('https://fonts.googleapis.com/css?family=Stylish&display=swap');
+
+  ::-webkit-scrollbar { 
+    display: none; 
+  }
+  body {
+    font-family: 'Stylish', sans-serif;
+  }
 `;
 
 const App = ({ Component, store, pageProps }) => (
@@ -37,6 +42,7 @@ const App = ({ Component, store, pageProps }) => (
           rel="stylesheet"
           type="text/css"
           href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css"
+        />
         />
       </Head>
       <Layout>

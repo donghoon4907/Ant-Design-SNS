@@ -20,9 +20,13 @@ export const LOAD_USER_REQUEST = "LOAD_USER_REQUEST";
 export const LOAD_USER_SUCCESS = "LOAD_USER_SUCCESS";
 export const LOAD_USER_FAILURE = "LOAD_USER_FAILURE";
 
-export const LOAD_FOLLOW_REQUEST = "LOAD_FOLLOW_REQUEST";
-export const LOAD_FOLLOW_SUCCESS = "LOAD_FOLLOW_SUCCESS";
-export const LOAD_FOLLOW_FAILURE = "LOAD_FOLLOW_FAILURE";
+export const LOAD_FOLLOWERS_REQUEST = "LOAD_FOLLOWERS_REQUEST";
+export const LOAD_FOLLOWERS_SUCCESS = "LOAD_FOLLOWERS_SUCCESS";
+export const LOAD_FOLLOWERS_FAILURE = "LOAD_FOLLOWERS_FAILURE";
+
+export const LOAD_FOLLOWINGS_REQUEST = "LOAD_FOLLOWINGS_REQUEST";
+export const LOAD_FOLLOWINGS_SUCCESS = "LOAD_FOLLOWINGS_SUCCESS";
+export const LOAD_FOLLOWINGS_FAILURE = "LOAD_FOLLOWINGS_FAILURE";
 
 export const FOLLOW_USER_REQUEST = "FOLLOW_USER_REQUEST";
 export const FOLLOW_USER_SUCCESS = "FOLLOW_USER_SUCCESS";
@@ -35,6 +39,10 @@ export const UNFOLLOW_USER_FAILURE = "UNFOLLOW_USER_FAILURE";
 export const REMOVE_FOLLOWER_REQUEST = "REMOVE_FOLLOWER_REQUEST";
 export const REMOVE_FOLLOWER_SUCCESS = "REMOVE_FOLLOWER_SUCCESS";
 export const REMOVE_FOLLOWER_FAILURE = "REMOVE_FOLLOWER_FAILURE";
+
+export const EDIT_USERID_REQUEST = "EDIT_USERID_REQUEST";
+export const EDIT_USERID_SUCCESS = "EDIT_USERID_SUCCESS";
+export const EDIT_USERID_FAILURE = "EDIT_USERID_FAILURE";
 
 export const initialState = {
   isLoginLoading: false, // 로그인 요청 시도 중
@@ -111,12 +119,15 @@ export default (state = initialState, action) => {
         logOutErrorReason: action.error
       };
     }
+    // 로그인 시, 특정 유저 검색 시 이용됨
     case LOAD_USER_REQUEST: {
       return {
-        ...state
+        ...state,
+        userInfo: null
       };
     }
     case LOAD_USER_SUCCESS: {
+      // 로그인된 정보를 가져올 경우 undefined, 특정 유저 검색시 me가 id값을 가집니다.
       if (action.me) {
         return {
           ...state,
@@ -141,7 +152,8 @@ export default (state = initialState, action) => {
     }
     case FOLLOW_USER_SUCCESS: {
       return {
-        ...state
+        ...state,
+        followingList: [...action.payload]
       };
     }
     case FOLLOW_USER_FAILURE: {
@@ -156,7 +168,8 @@ export default (state = initialState, action) => {
     }
     case UNFOLLOW_USER_SUCCESS: {
       return {
-        ...state
+        ...state,
+        followingList: state.followingList.filter(v => v.id !== action.payload)
       };
     }
     case UNFOLLOW_USER_FAILURE: {
@@ -164,6 +177,73 @@ export default (state = initialState, action) => {
         ...state
       };
     }
+    case LOAD_FOLLOWERS_REQUEST: {
+      return {
+        ...state
+      };
+    }
+    case LOAD_FOLLOWERS_SUCCESS: {
+      return {
+        ...state,
+        followerList: [...action.payload]
+      };
+    }
+    case LOAD_FOLLOWERS_FAILURE: {
+      return {
+        ...state
+      };
+    }
+    case LOAD_FOLLOWINGS_REQUEST: {
+      return {
+        ...state
+      };
+    }
+    case LOAD_FOLLOWINGS_SUCCESS: {
+      return {
+        ...state,
+        followingList: [...action.payload]
+      };
+    }
+    case LOAD_FOLLOWINGS_FAILURE: {
+      return {
+        ...state
+      };
+    }
+    case REMOVE_FOLLOWER_REQUEST: {
+      return {
+        ...state
+      };
+    }
+    case REMOVE_FOLLOWER_SUCCESS: {
+      return {
+        ...state
+      };
+    }
+    case REMOVE_FOLLOWER_FAILURE: {
+      return {
+        ...state
+      };
+    }
+    case EDIT_USERID_REQUEST: {
+      return {
+        ...state
+      };
+    }
+    case EDIT_USERID_SUCCESS: {
+      return {
+        ...state,
+        loadUserData: {
+          ...state.loadUserData,
+          userId: action.payload
+        }
+      };
+    }
+    case EDIT_USERID_FAILURE: {
+      return {
+        ...state
+      };
+    }
+
     default:
       return state;
   }

@@ -1,32 +1,47 @@
-import React, { memo } from "react";
+import React from "react";
 import Link from "next/link";
 import Router from "next/router";
-import { Menu, Icon, Button } from "antd";
+import { Menu, Icon, Button, Avatar } from "antd";
 import PropTypes from "prop-types";
+import {
+  LayoutContainer,
+  UserInfoContainer,
+  Thumbnail,
+  StyledMenu,
+  ChildContainer
+} from "./LayoutStyledComponents";
 
 const LayoutPresentation = ({ children, onLogout, loadUserData }) => (
   <>
-    <div style={{ position: "fixed", width: "240px" }}>
-      {loadUserData.thumbnail !== "none" && (
-        <img
-          src={`http://localhost:3001/${loadUserData.thumbnail}`}
-          style={{ width: "30px", height: "30px" }}
-          alt="load error"
-        />
-      )}
-      <span>{loadUserData.userId}</span>
-      <Button style={{ float: "right" }} onClick={onLogout}>
-        로그아웃
-      </Button>
-      <Menu
-        mode="vertical"
-        defaultSelectedKeys={[Router.pathname]}
-        style={{
-          height: "97vh",
-          marginTop: "3vh",
-          borderTop: "1px solid #E8E8E8"
-        }}
-      >
+    <LayoutContainer>
+      <div>
+        <UserInfoContainer>
+          {loadUserData.thumbnail === "none" ? (
+            <Avatar
+              shape="square"
+              icon="user"
+              style={{ width: "100%", height: "180px", fontSize: 180 }}
+            />
+          ) : (
+            <Thumbnail
+              src={`http://localhost:3001/${loadUserData.thumbnail}`}
+              alt="load error"
+            />
+          )}
+        </UserInfoContainer>
+        <div>
+          <div style={{ fontSize: "20px" }}>
+            {loadUserData.userId} 님 반갑습니다.
+          </div>
+        </div>
+        <div>
+          <Button onClick={onLogout} style={{ width: "100%" }}>
+            로그아웃
+          </Button>
+        </div>
+      </div>
+
+      <StyledMenu mode="vertical" defaultSelectedKeys={[Router.pathname]}>
         <Menu.Item key="/">
           <Link href="/">
             <a>
@@ -43,13 +58,13 @@ const LayoutPresentation = ({ children, onLogout, loadUserData }) => (
             </a>
           </Link>
         </Menu.Item>
-      </Menu>
-    </div>
-    <div style={{ marginLeft: "250px", paddingRight: "10px" }}>{children}</div>
+      </StyledMenu>
+    </LayoutContainer>
+    <ChildContainer>{children}</ChildContainer>
   </>
 );
 
-export default memo(LayoutPresentation);
+export default LayoutPresentation;
 
 LayoutPresentation.propTypes = {
   children: PropTypes.node.isRequired,

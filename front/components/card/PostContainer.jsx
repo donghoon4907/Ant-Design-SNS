@@ -14,7 +14,7 @@ import {
 } from "../../reducers/user";
 import PostPresentation from "./PostPresentation";
 
-const PostContainer = ({ post }) => {
+const PostContainer = ({ post, used }) => {
   const dispatch = useDispatch();
   const commentRef = useRef(null);
   const [commentCount, setCommentCount] = useState(
@@ -26,7 +26,6 @@ const PostContainer = ({ post }) => {
   const { isAddComment } = useSelector(state => state.post);
   const [isLike, setIsLike] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
-
   const onFollow = useCallback(
     userId => () => {
       setIsFollowing(true);
@@ -150,6 +149,7 @@ const PostContainer = ({ post }) => {
     loadUserData && (
       <PostPresentation
         post={post}
+        used={used}
         likeCount={likeCount}
         commentCount={commentCount}
         loadUserData={loadUserData.id}
@@ -185,5 +185,6 @@ PostContainer.propTypes = {
     Images: PropTypes.arrayOf(PropTypes.shape({ src: PropTypes.string }))
       .isRequired,
     Likers: PropTypes.array
-  })
+  }),
+  used: PropTypes.string
 };
