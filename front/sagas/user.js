@@ -101,18 +101,18 @@ function unfollowAPI(userId) {
     .catch(error => ({ error }));
 }
 
-function loadFollowersAPI(userId) {
+function loadFollowersAPI(userId, lastId = 0, limit = 6) {
   return axios
-    .get(`/user/${userId}/followers`, {
+    .get(`/user/${userId || 0}/followers?lastId=${lastId}&limit=${limit}`, {
       withCredentials: true
     })
     .then(response => ({ response }))
     .catch(error => ({ error }));
 }
 
-function loadFollowingsAPI(userId) {
+function loadFollowingsAPI(userId, offset = 0, limit = 6) {
   return axios
-    .get(`/user/${userId}/followings`, {
+    .get(`/user/${userId || 0}/followings?offset=${offset}&limit=${limit}`, {
       withCredentials: true
     })
     .then(response => ({ response }))
@@ -149,16 +149,12 @@ function* logIn(action) {
       type: LOG_IN_SUCCESS,
       payload: response.data
     });
-    yield put({
-      type: LOAD_USER_REQUEST
-    });
-    alert("로그인 성공");
+    window.location.href = "/";
   } else if (error) {
     yield put({
       type: LOG_IN_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -171,7 +167,6 @@ function* signUp(action) {
     yield put({
       type: SIGN_UP_SUCCESS
     });
-    alert("회원가입 성공. 로그인 페이지로 이동합니다.");
     action.payload.successEvent.call(null);
   } else if (error) {
     yield put({
@@ -188,7 +183,6 @@ function* signUp(action) {
 function* logOut() {
   try {
     yield call(logOutAPI);
-    alert("로그아웃 되었습니다.");
     yield put({
       type: LOG_OUT_SUCCESS
     });
@@ -232,7 +226,6 @@ function* follow(action) {
       type: FOLLOW_USER_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -251,7 +244,6 @@ function* unfollow(action) {
       type: UNFOLLOW_USER_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -259,7 +251,11 @@ function* unfollow(action) {
 }
 
 function* loadFollowers(action) {
-  const { response, error } = yield call(loadFollowersAPI, action.payload);
+  const { response, error } = yield call(
+    loadFollowersAPI,
+    action.payload,
+    action.lastId
+  );
   if (response) {
     yield put({
       type: LOAD_FOLLOWERS_SUCCESS,
@@ -270,7 +266,6 @@ function* loadFollowers(action) {
       type: LOAD_FOLLOWERS_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -278,7 +273,11 @@ function* loadFollowers(action) {
 }
 
 function* loadFollowings(action) {
-  const { response, error } = yield call(loadFollowingsAPI, action.payload);
+  const { response, error } = yield call(
+    loadFollowingsAPI,
+    action.payload,
+    action.offset
+  );
   if (response) {
     yield put({
       type: LOAD_FOLLOWINGS_SUCCESS,
@@ -289,7 +288,6 @@ function* loadFollowings(action) {
       type: LOAD_FOLLOWINGS_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -307,7 +305,6 @@ function* removeFollower(action) {
       type: REMOVE_FOLLOWER_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -326,7 +323,6 @@ function* editUserId(action) {
       type: EDIT_USERID_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");

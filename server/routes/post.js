@@ -7,7 +7,17 @@ const { isLoggedIn } = require("./middleware");
 // 모든 사용자가 작성한 게시글 가져오기
 router.get("/load", async (req, res, next) => {
   try {
+    let where = {};
+    // lastId가 0인 경우 처음데이터 로드, 아닌 경우 그 다음 데이터 로드
+    if (parseInt(req.query.lastId, 10)) {
+      where = {
+        id: {
+          [db.Sequelize.Op.lt]: parseInt(req.query.lastId, 10) // less than
+        }
+      };
+    }
     const posts = await db.Post.findAll({
+      where,
       include: [
         {
           model: db.User,
@@ -47,7 +57,8 @@ router.get("/load", async (req, res, next) => {
           ]
         }
       ],
-      order: [["createdAt", "DESC"]] // DESC는 내림차순, ASC는 오름차순
+      order: [["createdAt", "DESC"]], // DESC는 내림차순, ASC는 오름차순
+      limit: parseInt(req.query.limit, 10)
     });
     res.json(posts);
   } catch (e) {
@@ -316,6 +327,18 @@ router.post("/:id/retweet", isLoggedIn, async (req, res, next) => {
   try {
   } catch (e) {
     console.error(e);
+    next(e);
+  }
+});
+
+router.delete("/:id/remove", isLoggedIn, async (req, res, next) => {
+  try {
+    const post = await db.Post.findOne({ where: { id: req.params.id } });
+    if (!post) return res.status(404).send("포스트가 존재하지 않습니다.");
+    await db.Post.destroy({ where: { id: req.params.id } });
+    res.send(req.params.id);
+  } catch (e) {
+    console.errror(e);
     next(e);
   }
 });

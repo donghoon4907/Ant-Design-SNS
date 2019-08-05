@@ -1,4 +1,4 @@
-import { all, fork, takeEvery, put, call } from "redux-saga/effects";
+import { all, fork, takeEvery, put, call, throttle } from "redux-saga/effects";
 import {
   ADD_POST_REQUEST,
   ADD_POST_SUCCESS,
@@ -43,16 +43,17 @@ function addPostAPI(postData) {
     .catch(error => ({ error }));
 }
 
-function loadPostAPI() {
+function loadPostAPI(lastId = 0, limit = 5) {
   return axios
-    .get("/post/load")
+    .get(`/post/load?lastId=${lastId}&limit=${limit}`)
     .then(response => ({ response }))
     .catch(error => ({ error }));
 }
 
-function loadHashTagPostAPI(tag) {
+function loadHashTagPostAPI(tag, lastId = 0, limit = 5) {
+  // 한글 데이터를 변환하는 작업 encodeURIComponent <-> decodeURIComponent
   return axios
-    .get(`/hashtag/${tag}`)
+    .get(`/hashtag/${encodeURIComponent(tag)}?lastId=${lastId}&limit=${limit}`)
     .then(response => ({ response }))
     .catch(error => ({ error }));
 }
@@ -125,6 +126,15 @@ function retweetAPI(postId) {
     .catch(error => ({ error }));
 }
 
+function removePostAPI(postId) {
+  return axios
+    .delete(`/post/${postId}/remove`, {
+      withCredentials: true
+    })
+    .then(response => ({ response }))
+    .catch(error => ({ error }));
+}
+
 function* addPost(action) {
   const { response, error } = yield call(addPostAPI, action.payload);
   if (response) {
@@ -137,30 +147,32 @@ function* addPost(action) {
       type: ADD_POST_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
   }
 }
 
-function* removePost() {
-  try {
+function* removePost(action) {
+  const { response, error } = yield call(removePostAPI, action.payload);
+  if (response) {
     yield put({
-      type: REMOVE_POST_SUCCESS
+      type: REMOVE_POST_SUCCESS,
+      payload: response.data
     });
-  } catch (e) {
-    console.error(e);
+  } else if (error) {
     yield put({
       type: REMOVE_POST_FAILURE,
-      error: e
+      error
     });
-    alert(e.response.data);
+  } else {
+    console.error(error);
+    alert("알 수 없는 오류가 발생했습니다.");
   }
 }
 
-function* loadPost() {
-  const { response, error } = yield call(loadPostAPI);
+function* loadPost(action) {
+  const { response, error } = yield call(loadPostAPI, action.payload);
   if (response) {
     yield put({
       type: LOAD_MAIN_POST_SUCCESS,
@@ -171,7 +183,6 @@ function* loadPost() {
       type: LOAD_MAIN_POST_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -190,7 +201,6 @@ function* loadHashTagPost(action) {
       type: LOAD_HASHTAG_POST_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -209,7 +219,6 @@ function* loadUserPost(action) {
       type: LOAD_USER_POST_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -227,7 +236,6 @@ function* addComment(action) {
       type: ADD_COMMENT_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -246,7 +254,6 @@ function* uploadImage(action) {
       type: UPLOAD_IMAGES_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -264,7 +271,6 @@ function* likePost(action) {
       type: LIKE_POST_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -282,7 +288,6 @@ function* unlikePost(action) {
       type: UNLIKE_POST_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -302,7 +307,6 @@ function* retweet(action) {
       type: RETWEET_FAILURE,
       error
     });
-    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");
@@ -315,7 +319,7 @@ function* watchAddPost() {
 }
 // 포스트 불러오기
 function* watchLoadPost() {
-  yield takeEvery(LOAD_MAIN_POST_REQUEST, loadPost);
+  yield throttle(2000, LOAD_MAIN_POST_REQUEST, loadPost);
 }
 // 포스트 삭제
 function* watchRemovePost() {
@@ -323,7 +327,7 @@ function* watchRemovePost() {
 }
 // 특정 해쉬태그 관련 포스트 불러오기
 function* watchLoadHashtagPost() {
-  yield takeEvery(LOAD_HASHTAG_POST_REQUEST, loadHashTagPost);
+  yield throttle(2000, LOAD_HASHTAG_POST_REQUEST, loadHashTagPost);
 }
 // 특정 유저가 작성한 포스트 불러오기 // 사용되지 않음
 function* watchLoadUserPost() {

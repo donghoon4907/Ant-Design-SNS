@@ -5,8 +5,17 @@ const db = require("../models");
 // 특정 해쉬태그와 연관된 포스트 검색
 router.get("/:tag", async (req, res, next) => {
   try {
+    let where = {};
+    if (parseInt(req.query.lastId, 10)) {
+      where = {
+        id: {
+          [db.Sequelize.Op.lt]: parseInt(req.query.lastId, 10)
+        }
+      };
+    }
     const posts = await db.Post.findAll({
       // join
+      where,
       include: [
         {
           model: db.Hashtag,
@@ -50,7 +59,9 @@ router.get("/:tag", async (req, res, next) => {
             }
           ]
         }
-      ]
+      ],
+      order: [["createdAt", "DESC"]], // DESC는 내림차순, ASC는 오름차순
+      limit: parseInt(req.query.limit, 10)
     });
     res.json(posts);
   } catch (e) {

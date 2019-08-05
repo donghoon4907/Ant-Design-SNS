@@ -22,7 +22,8 @@ const PostPresentation = ({
   onSubmit,
   onRetweet,
   onFollow,
-  onUnfollow
+  onUnfollow,
+  onRemovePost
 }) => (
   <Card
     cover={post.Images && post.Images[0] && <PostImages images={post.Images} />}
@@ -62,7 +63,9 @@ const PostPresentation = ({
               {post.UserId === loadUserData ? (
                 <>
                   <Button>수정</Button>
-                  <Button type="danger">삭제</Button>
+                  <Button type="danger" onClick={onRemovePost(post.id)}>
+                    삭제
+                  </Button>
                 </>
               ) : (
                 <Button>신고</Button>
@@ -221,5 +224,6 @@ PostPresentation.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onRetweet: PropTypes.func.isRequired,
   onFollow: PropTypes.func.isRequired,
-  onUnfollow: PropTypes.func.isRequired
+  onUnfollow: PropTypes.func.isRequired,
+  onRemovePost: PropTypes.func.isRequired
 };

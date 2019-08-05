@@ -98,7 +98,8 @@ router.get("/loadUser", isLoggedIn, async (req, res) => {
       include: [
         {
           model: db.User,
-          as: "Followings"
+          as: "Followings",
+          attributes: ["id", "userId", "thumbnail"]
         }
       ]
     });
@@ -208,7 +209,7 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 // 팔로우
-router.get("/:id/follow", async (req, res, next) => {
+router.get("/:id/follow", isLoggedIn, async (req, res, next) => {
   try {
     const me = await db.User.findOne({ where: { id: req.user.id } });
     await me.addFollowing(req.params.id);
@@ -222,7 +223,7 @@ router.get("/:id/follow", async (req, res, next) => {
   }
 });
 // 언팔로우
-router.delete("/:id/follow", async (req, res, next) => {
+router.delete("/:id/follow", isLoggedIn, async (req, res, next) => {
   try {
     const me = await db.User.findOne({ where: { id: req.user.id } });
     await me.removeFollowing(req.params.id);
@@ -236,10 +237,15 @@ router.delete("/:id/follow", async (req, res, next) => {
 router.get("/:id/followings", isLoggedIn, async (req, res, next) => {
   try {
     const user = await db.User.findOne({
-      where: { id: parseInt(req.params.id, 10) }
+      // user의 데이터를 얻기전에 요청된 경우 방지
+      where: {
+        id: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0
+      }
     });
     const followers = await user.getFollowings({
-      attributes: ["id", "userId", "thumbnail"]
+      attributes: ["id", "userId", "thumbnail"],
+      limit: parseInt(req.query.limit, 10),
+      offset: parseInt(req.query.offset, 10)
     });
     res.json(followers);
   } catch (e) {
@@ -250,11 +256,24 @@ router.get("/:id/followings", isLoggedIn, async (req, res, next) => {
 // 팔로워 목록 로드
 router.get("/:id/followers", isLoggedIn, async (req, res, next) => {
   try {
+    let where = {};
+    if (parseInt(req.query.lastId, 10)) {
+      where = {
+        id: {
+          [db.Sequelize.Op.lt]: parseInt(req.query.lastId, 10)
+        }
+      };
+    }
     const user = await db.User.findOne({
-      where: { id: parseInt(req.params.id, 10) }
+      where: {
+        id: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0
+      }
     });
     const followers = await user.getFollowers({
-      attributes: ["id", "userId", "thumbnail"]
+      where,
+      attributes: ["id", "userId", "thumbnail"],
+      order: [["createdAt", "DESC"]],
+      limit: parseInt(req.query.limit, 10)
     });
     res.json(followers);
   } catch (e) {

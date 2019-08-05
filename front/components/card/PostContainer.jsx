@@ -6,7 +6,8 @@ import {
   ADD_COMMENT_REQUEST,
   LIKE_POST_REQUEST,
   UNLIKE_POST_REQUEST,
-  RETWEET_REQUEST
+  RETWEET_REQUEST,
+  REMOVE_POST_REQUEST
 } from "../../reducers/post";
 import {
   FOLLOW_USER_REQUEST,
@@ -26,6 +27,15 @@ const PostContainer = ({ post, used }) => {
   const { isAddComment } = useSelector(state => state.post);
   const [isLike, setIsLike] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const onRemovePost = useCallback(
+    postId => () => {
+      dispatch({
+        type: REMOVE_POST_REQUEST,
+        payload: postId
+      });
+    },
+    []
+  );
   const onFollow = useCallback(
     userId => () => {
       setIsFollowing(true);
@@ -90,18 +100,25 @@ const PostContainer = ({ post, used }) => {
     content =>
       content.map(val => {
         if (val.match(/#[^\s]+/)) {
-          return (
-            <Link
-              href={{
-                pathname: "/hashtag",
-                query: { tag: val.slice(1).toLowerCase() }
-              }}
-              as={`/hashtag/${val.slice(1)}`}
-              key={val}
-            >
-              <a>{val}</a>
-            </Link>
-          );
+          if (
+            decodeURIComponent(window.location.pathname.split("/")[2]) ===
+            val.slice(1)
+          ) {
+            return <b key={val}>{val}</b>;
+          } else {
+            return (
+              <Link
+                href={{
+                  pathname: "/hashtag",
+                  query: { tag: val.slice(1).toLowerCase() }
+                }}
+                as={`/hashtag/${val.slice(1)}`}
+                key={val}
+              >
+                <a>{val}</a>
+              </Link>
+            );
+          }
         }
         return val;
       }),
@@ -165,6 +182,7 @@ const PostContainer = ({ post, used }) => {
         onRetweet={onRetweet}
         onFollow={onFollow}
         onUnfollow={onUnfollow}
+        onRemovePost={onRemovePost}
       />
     )
   );

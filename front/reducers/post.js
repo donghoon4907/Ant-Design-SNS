@@ -59,13 +59,12 @@ export const initialState = {
   isRemovePostLoading: false, // 포스트 삭제 요청 시도 중
   historyPostCount: 0, // 만들어졌던 포스트 개수
   mainPosts: [], // 작성글 목록
+  hashTagPosts: [], // 해쉬태그 작성글 목록
   images: [], // 업로드된 이미지 파일 목록
   loadPostErrorReason: "", // 포스트 불러오기 실패 사유
   imagePaths: [], // 미리보기 이미지 경로
   addPostErrorReason: "", // 포스트 업로드 실패 사유
   removePostErrorReason: "", // 포스트 삭제 실패 사유
-  backupData: null, // 포스트 삭제 요청 시 임시로 저장할 데이터
-  backupDataIndex: -1, // 포스트 삭제 전 위치
   addCommentError: "", // 포스트 댓글 추가 요청 실패 사유
   uploadError: "", // 업로드 요청 실패 사유
   loadUserInfoError: "", // 유저 정보 요청 실패 사유
@@ -97,55 +96,59 @@ export default (state = initialState, action) => {
         addPostErrorReason: action.error
       };
     }
-    // case REMOVE_POST_REQUEST: {
-    //   return {
-    //     ...state,
-    //     backupData: state.mainPosts[action.payload],
-    //     mainPosts: state.mainPosts.filter(
-    //       (post, idx) => idx !== action.payload
-    //     ),
-    //     isRemovePostLoading: true,
-    //     backupDataIndex: action.payload
-    //   };
-    // }
-    // case REMOVE_POST_SUCCESS: {
-    //   return {
-    //     ...state,
-    //     isRemovePostLoading: false,
-    //     backupData: null,
-    //     backupDataIndex: -1
-    //   };
-    // }
-    // case REMOVE_POST_FAILURE: {
-    //   return {
-    //     ...state,
-    //     mainPosts: state.mainPosts.splice(
-    //       state.backupDataIndex,
-    //       0,
-    //       state.backupData
-    //     ),
-    //     backupData: null,
-    //     backupDataIndex: -1
-    //   };
-    // }
-    case LOAD_HASHTAG_POST_REQUEST:
+    case REMOVE_POST_REQUEST: {
+      return {
+        ...state,
+        isRemovePostLoading: true
+      };
+    }
+    case REMOVE_POST_SUCCESS: {
+      return {
+        ...state,
+        isRemovePostLoading: false,
+        mainPosts: state.mainPosts.filter(post => post.id !== action.payload)
+      };
+    }
+    case REMOVE_POST_FAILURE: {
+      return {
+        ...state,
+        removePostErrorReason: action.payload
+      };
+    }
     case LOAD_MAIN_POST_REQUEST: {
       return {
         ...state,
-        isLoadPosts: true,
-        mainPosts: []
+        isLoadPosts: true
       };
     }
-    case LOAD_HASHTAG_POST_SUCCESS:
     case LOAD_MAIN_POST_SUCCESS: {
       return {
         ...state,
         isLoadPosts: false,
-        mainPosts: action.payload
+        mainPosts: state.mainPosts.concat(action.payload)
       };
     }
-    case LOAD_HASHTAG_POST_FAILURE:
     case LOAD_MAIN_POST_FAILURE: {
+      return {
+        ...state,
+        isLoadPosts: false,
+        isLoadPostError: action.error
+      };
+    }
+    case LOAD_HASHTAG_POST_REQUEST: {
+      return {
+        ...state,
+        isLoadPosts: true
+      };
+    }
+    case LOAD_HASHTAG_POST_SUCCESS: {
+      return {
+        ...state,
+        isLoadPosts: false,
+        hashTagPosts: state.hashTagPosts.concat(action.payload)
+      };
+    }
+    case LOAD_HASHTAG_POST_FAILURE: {
       return {
         ...state,
         isLoadPosts: false,

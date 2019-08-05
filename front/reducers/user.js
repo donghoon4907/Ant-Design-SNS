@@ -55,7 +55,9 @@ export const initialState = {
   followingList: [], // 팔로잉 리스트
   followerList: [], // 팔로워 리스트
   loadUserData: null, // 로드된 로그인한 사용자 정보
-  userInfo: null // 특정 사용자 정보
+  userInfo: null, // 특정 사용자 정보
+  hasMoreFollower: false, // 더보기 버튼 보여줄지 여부
+  hasMoreFollowing: false // 더보기 버튼 보여줄지 여부
 };
 
 export default (state = initialState, action) => {
@@ -109,7 +111,10 @@ export default (state = initialState, action) => {
         ...state,
         isLoggedIn: false,
         isLogoutLoading: false,
-        loadUserData: null
+        loadUserData: null,
+        followerList: [],
+        followingList: [],
+        userInfo: null
       };
     }
     case LOG_OUT_FAILURE: {
@@ -122,8 +127,7 @@ export default (state = initialState, action) => {
     // 로그인 시, 특정 유저 검색 시 이용됨
     case LOAD_USER_REQUEST: {
       return {
-        ...state,
-        userInfo: null
+        ...state
       };
     }
     case LOAD_USER_SUCCESS: {
@@ -179,13 +183,15 @@ export default (state = initialState, action) => {
     }
     case LOAD_FOLLOWERS_REQUEST: {
       return {
-        ...state
+        ...state,
+        hasMoreFollower: action.lastId ? state.hasMoreFollower : true
       };
     }
     case LOAD_FOLLOWERS_SUCCESS: {
       return {
         ...state,
-        followerList: [...action.payload]
+        followerList: state.followerList.concat(action.payload),
+        hasMoreFollower: action.payload.length === 6
       };
     }
     case LOAD_FOLLOWERS_FAILURE: {
@@ -195,13 +201,15 @@ export default (state = initialState, action) => {
     }
     case LOAD_FOLLOWINGS_REQUEST: {
       return {
-        ...state
+        ...state,
+        hasMoreFollowing: action.offset ? state.hasMoreFollowing : true
       };
     }
     case LOAD_FOLLOWINGS_SUCCESS: {
       return {
         ...state,
-        followingList: [...action.payload]
+        followingList: state.followingList.concat(action.payload),
+        hasMoreFollowing: action.payload.length === 6
       };
     }
     case LOAD_FOLLOWINGS_FAILURE: {

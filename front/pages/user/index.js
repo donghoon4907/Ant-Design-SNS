@@ -1,25 +1,12 @@
-import React, { useEffect } from "react";
-import PropTypes from "prop-types";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
+import { useSelector } from "react-redux";
 import { Avatar, Button } from "antd";
-import { useRouter } from "next/router";
 import { LOAD_USER_REQUEST } from "../../reducers/user";
 import PostCard from "../../components/card/PostContainer";
 
-const User = ({ id }) => {
-  const dispatch = useDispatch();
-  const router = useRouter();
+const User = () => {
   const { loadUserData } = useSelector(state => state.user);
   const { userInfo } = useSelector(state => state.user);
-  useEffect(() => {
-    if (!loadUserData) {
-      router.push("/");
-    }
-    dispatch({
-      type: LOAD_USER_REQUEST,
-      payload: id
-    });
-  }, []);
   return (
     userInfo &&
     loadUserData && (
@@ -91,10 +78,11 @@ const User = ({ id }) => {
   );
 };
 
-User.getInitialProps = async ({ query: { id } }) => ({ id });
+User.getInitialProps = async context => {
+  context.store.dispatch({
+    type: LOAD_USER_REQUEST,
+    payload: context.query.id
+  });
+};
 
 export default User;
-
-User.propTypes = {
-  id: PropTypes.string
-};
