@@ -1,9 +1,9 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { Avatar, Button } from "antd";
-import { LOAD_USER_REQUEST } from "../../reducers/user";
-import PostCard from "../../components/card/PostContainer";
-import { Container, Thumbnail, Description } from "./style";
+import { LOAD_USER_REQUEST } from "../reducers/user";
+import PostCard from "../components/card/PostContainer";
+import { Container, Thumbnail, Description } from "../components/style/user";
 
 const User = () => {
   const { loadUserData } = useSelector(state => state.user);

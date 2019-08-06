@@ -6,8 +6,8 @@ import {
   LOAD_FOLLOWINGS_REQUEST,
   FOLLOW_USER_REQUEST,
   UNFOLLOW_USER_REQUEST
-} from "../../reducers/user";
-import { Thumbnail, UserName, StyledAvatar } from "./style";
+} from "../reducers/user";
+import { Thumbnail, UserName, StyledAvatar } from "../components/style/profile";
 // 팔로워 삭제는 보류
 const Profile = () => {
   const dispatch = useDispatch();

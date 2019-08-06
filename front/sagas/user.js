@@ -149,6 +149,7 @@ function* logIn(action) {
       type: LOG_IN_SUCCESS,
       payload: response.data
     });
+    alert("로그인 성공");
     window.location.href = "/";
   } else if (error) {
     yield put({

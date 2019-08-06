@@ -1,11 +1,8 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { useSelector, useDispatch } from "react-redux";
-import PostCard from "../../components/card/PostContainer";
-import {
-  LOAD_HASHTAG_POST_REQUEST,
-  INIT_HASHTAG_POST
-} from "../../reducers/post";
+import PostCard from "../components/card/PostContainer";
+import { LOAD_HASHTAG_POST_REQUEST, INIT_HASHTAG_POST } from "../reducers/post";
 
 const HashTag = ({ tag }) => {
   const dispatch = useDispatch();

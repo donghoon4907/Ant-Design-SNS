@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 import LayoutPresentation from "./LayoutPresentation";
-import { LOAD_USER_REQUEST, LOG_OUT_REQUEST } from "../../reducers/user";
+import { LOG_OUT_REQUEST } from "../../reducers/user";
 import LoginPage from "./LoginContainer";
+import LoadingPage from "./Loading";
 
 const LayoutContainer = ({ children }) => {
   const dispatch = useDispatch();
@@ -17,19 +18,15 @@ const LayoutContainer = ({ children }) => {
   }, []);
   useEffect(() => {
     setLoad(false);
-    dispatch({
-      type: LOAD_USER_REQUEST
-    });
   }, []);
 
   return load ? (
-    <div>loading...</div>
+    <LoadingPage />
   ) : !loadUserData ? (
     <LoginPage />
   ) : (
     <LayoutPresentation
       children={children}
-      load={load}
       loadUserData={loadUserData}
       onLogout={onLogout}
     />
