@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { List, Button, Card, Avatar } from "antd";
+import { List, Button, Card } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import {
   LOAD_FOLLOWERS_REQUEST,
@@ -7,6 +7,7 @@ import {
   FOLLOW_USER_REQUEST,
   UNFOLLOW_USER_REQUEST
 } from "../../reducers/user";
+import { Thumbnail, UserName, StyledAvatar } from "./style";
 // 팔로워 삭제는 보류
 const Profile = () => {
   const dispatch = useDispatch();
@@ -77,23 +78,11 @@ const Profile = () => {
               title={
                 <div style={{ textAlign: "center" }}>
                   {item.thumbnail === "none" ? (
-                    <Avatar
-                      icon="user"
-                      style={{
-                        width: "100%",
-                        height: "180px",
-                        fontSize: 150
-                      }}
-                    />
+                    <StyledAvatar icon="user" />
                   ) : (
-                    <img
+                    <Thumbnail
                       src={`http://localhost:3001/${item.thumbnail}`}
                       alt="..."
-                      style={{
-                        width: "100%",
-                        height: "180px",
-                        borderRadius: "50%"
-                      }}
                     />
                   )}
                 </div>
@@ -102,9 +91,7 @@ const Profile = () => {
               <Card.Meta
                 description={
                   <div>
-                    <div style={{ fontSize: "20px", textAlign: "center" }}>
-                      {item.userId}
-                    </div>
+                    <UserName>{item.userId}</UserName>
                   </div>
                 }
               />
@@ -137,23 +124,11 @@ const Profile = () => {
               title={
                 <div style={{ textAlign: "center" }}>
                   {item.thumbnail === "none" ? (
-                    <Avatar
-                      icon="user"
-                      style={{
-                        width: "100%",
-                        height: "180px",
-                        fontSize: 150
-                      }}
-                    />
+                    <StyledAvatar icon="user" />
                   ) : (
-                    <img
+                    <Thumbnail
                       src={`http://localhost:3001/${item.thumbnail}`}
                       alt="..."
-                      style={{
-                        width: "100%",
-                        height: "180px",
-                        borderRadius: "50%"
-                      }}
                     />
                   )}
                 </div>
@@ -162,9 +137,7 @@ const Profile = () => {
               <Card.Meta
                 description={
                   <div>
-                    <div style={{ fontSize: "20px", textAlign: "center" }}>
-                      {item.userId}
-                    </div>
+                    <UserName>{item.userId}</UserName>
                   </div>
                 }
               />

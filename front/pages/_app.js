@@ -1,18 +1,20 @@
 import React from "react";
-import Head from "next/head";
 import PropTypes from "prop-types";
 import { createStore, compose, applyMiddleware } from "redux";
 import { Provider } from "react-redux";
 import withRedux from "next-redux-wrapper";
 import createSagaMiddleware from "redux-saga";
 import withReduxSaga from "next-redux-saga";
+import axios from "axios";
 import { ThemeProvider, createGlobalStyle } from "styled-components";
+import Helmet from "react-helmet";
+import { Container } from "next/app";
+
 import Layout from "../components/layout/LayoutContainer";
 import reducer from "../reducers";
 import rootSaga from "../sagas";
 import theme from "../theme";
 import { LOAD_USER_REQUEST } from "../reducers/user";
-import axios from "axios";
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Stylish&display=swap');
@@ -26,32 +28,67 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const App = ({ Component, store, pageProps }) => (
-  <ThemeProvider theme={theme}>
-    <Provider store={store}>
-      <Head>
-        <title>Next</title>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css"
+  <Container>
+    <ThemeProvider theme={theme}>
+      <Provider store={store}>
+        <Helmet
+          title="Next"
+          htmlAttributes={{ lang: "ko" }}
+          meta={[
+            {
+              charset: "UTF-8"
+            },
+            {
+              name: "viewport",
+              content:
+                "width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=yes"
+            },
+            {
+              "http-equiv": "X-UA-Compatible",
+              content: "IE=edge"
+            },
+            {
+              name: "description",
+              content: "Next SNS"
+            },
+            {
+              property: "og:type",
+              content: "website"
+            },
+            {
+              property: "og:title",
+              content: "Next"
+            },
+            {
+              property: "og:description",
+              content: "Next SNS"
+            }
+          ]}
+          link={[
+            {
+              rel: "stylesheet",
+              href:
+                "https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css"
+            },
+            {
+              rel: "stylesheet",
+              href:
+                "https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css"
+            },
+            {
+              rel: "stylesheet",
+              href:
+                "https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css"
+            }
+          ]}
         />
-        <link
-          rel="stylesheet"
-          type="text/css"
-          charset="UTF-8"
-          href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css"
-        />
-        <link
-          rel="stylesheet"
-          type="text/css"
-          href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css"
-        />
-      </Head>
-      <GlobalStyle />
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
-    </Provider>
-  </ThemeProvider>
+        <GlobalStyle />
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </Provider>
+    </ThemeProvider>
+  </Container>
 );
 // 동적 라우팅 시 해당 컴포넌트에 ctx를 전달
 App.getInitialProps = async ({ Component, ctx }) => {

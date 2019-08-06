@@ -307,6 +307,7 @@ function* retweet(action) {
       type: RETWEET_FAILURE,
       error
     });
+    alert(error.response.data);
   } else {
     console.error(error);
     alert("알 수 없는 오류가 발생했습니다.");

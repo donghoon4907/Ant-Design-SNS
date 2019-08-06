@@ -7,7 +7,6 @@ import {
   LayoutContainer,
   UserInfoContainer,
   Thumbnail,
-  StyledMenu,
   ChildContainer
 } from "./LayoutStyledComponents";
 
@@ -41,7 +40,15 @@ const LayoutPresentation = ({ children, onLogout, loadUserData }) => (
         </div>
       </div>
 
-      <StyledMenu mode="vertical" defaultSelectedKeys={[Router.pathname]}>
+      <Menu
+        mode="vertical"
+        defaultSelectedKeys={[Router.pathname]}
+        style={{
+          height: "80vh",
+          marginTop: "1vh",
+          borderTop: "1px solid #e8e8e8"
+        }}
+      >
         <Menu.Item key="/">
           <Link href="/">
             <a>
@@ -58,7 +65,7 @@ const LayoutPresentation = ({ children, onLogout, loadUserData }) => (
             </a>
           </Link>
         </Menu.Item>
-      </StyledMenu>
+      </Menu>
     </LayoutContainer>
     <ChildContainer>{children}</ChildContainer>
   </>

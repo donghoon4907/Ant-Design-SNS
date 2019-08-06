@@ -1,8 +1,8 @@
-/**
- * action / state / reducer
- */
+import produce from "immer";
 
 export const REMOVE_IMAGE = "REMOVE_IMAGE";
+
+export const INIT_HASHTAG_POST = "INIT_HASHTAG_POST";
 
 export const ADD_POST_REQUEST = "ADD_POST_REQUEST";
 export const ADD_POST_SUCCESS = "ADD_POST_SUCCESS";
@@ -54,7 +54,7 @@ export const LOAD_HASHTAG_POST_FAILURE = "LOAD_HASHTAG_POST_FAILURE";
 
 export const initialState = {
   isLoadPosts: false, // 포스트 불러오기 요청 시도 중
-  isaddPostLoading: false, // 포스트 추가 요청 시도 중
+  isAddPostLoading: false, // 포스트 추가 요청 시도 중
   isAddComment: false, // 포스트 댓글 추가 요청 시도 중
   isRemovePostLoading: false, // 포스트 삭제 요청 시도 중
   historyPostCount: 0, // 만들어졌던 포스트 개수
@@ -72,197 +72,134 @@ export const initialState = {
   unlikePostError: "" // 포스트 좋아요 취소 요청 실패 사유
 };
 
-export default (state = initialState, action) => {
-  switch (action.type) {
-    case ADD_POST_REQUEST: {
-      return {
-        ...state,
-        isaddPostLoading: true
-      };
+export default (state = initialState, action) =>
+  produce(state, draft => {
+    switch (action.type) {
+      case ADD_POST_REQUEST: {
+        draft.isAddPostLoading = true;
+        break;
+      }
+      case ADD_POST_SUCCESS: {
+        draft.isaddPostLoading = false;
+        draft.mainPosts.unshift(action.payload);
+        draft.images = [];
+        break;
+      }
+      case ADD_POST_FAILURE: {
+        draft.isAddPostLoading = false;
+        draft.images = [];
+        draft.addPostErrorReason = action.error;
+        break;
+      }
+      case REMOVE_POST_REQUEST: {
+        draft.isRemovePostLoading = true;
+        break;
+      }
+      case REMOVE_POST_SUCCESS: {
+        const idx = draft.mainPosts.findIndex(
+          post => post.id === action.payload
+        );
+        draft.isRemovePostLoading = false;
+        draft.mainPosts.splice(idx, 1);
+        break;
+      }
+      case REMOVE_POST_FAILURE: {
+        draft.removePostErrorReason = action.error;
+        break;
+      }
+      case LOAD_MAIN_POST_REQUEST: {
+        draft.isLoadPosts = true;
+        break;
+      }
+      case LOAD_MAIN_POST_SUCCESS: {
+        draft.isLoadPosts = false;
+        action.payload.forEach(v => draft.mainPosts.push(v));
+        break;
+      }
+      case LOAD_MAIN_POST_FAILURE: {
+        draft.isLoadPosts = false;
+        draft.isLoadPostError = action.error;
+        break;
+      }
+      case LOAD_HASHTAG_POST_REQUEST: {
+        draft.isLoadPosts = true;
+        break;
+      }
+      case LOAD_HASHTAG_POST_SUCCESS: {
+        draft.isLoadPosts = false;
+        action.payload.forEach(v => draft.hashTagPosts.push(v));
+        break;
+      }
+      case LOAD_HASHTAG_POST_FAILURE: {
+        draft.isLoadPosts = false;
+        draft.isLoadPostError = action.error;
+        break;
+      }
+      case LOAD_USER_POST_REQUEST:
+        break;
+      case LOAD_USER_POST_SUCCESS:
+        break;
+      case LOAD_USER_POST_FAILURE: {
+        draft.loadUserInfoError = action.error;
+        break;
+      }
+      case ADD_COMMENT_REQUEST: {
+        draft.isAddComment = true;
+        break;
+      }
+      case ADD_COMMENT_SUCCESS: {
+        draft.isAddComment = false;
+        break;
+      }
+      case ADD_COMMENT_FAILURE: {
+        draft.isAddComment = false;
+        draft.addCommentError = action.error;
+        break;
+      }
+      case UPLOAD_IMAGES_REQUEST:
+        break;
+      case UPLOAD_IMAGES_SUCCESS: {
+        draft.images.push(action.payload);
+        break;
+      }
+      case UPLOAD_IMAGES_FAILURE: {
+        draft.uploadError = action.error;
+        break;
+      }
+      // 비동기 처리가 필요없는 경우는 리덕스로만 처리
+      case REMOVE_IMAGE: {
+        draft.images.splice(action.payload, 1);
+        break;
+      }
+      case LIKE_POST_REQUEST:
+        break;
+      case LIKE_POST_SUCCESS:
+        break;
+      case LIKE_POST_FAILURE: {
+        draft.likePostError = action.error;
+        break;
+      }
+      case UNLIKE_POST_REQUEST:
+        break;
+      case UNLIKE_POST_SUCCESS:
+        break;
+      case UNLIKE_POST_FAILURE: {
+        draft.unlikePostError = action.error;
+        break;
+      }
+      case RETWEET_REQUEST:
+        break;
+      case RETWEET_SUCCESS: {
+        draft.mainPosts.unshift(action.payload);
+        break;
+      }
+      case RETWEET_FAILURE:
+        break;
+      case INIT_HASHTAG_POST: {
+        draft.hashTagPosts = [];
+        break;
+      }
+      default:
+        return state;
     }
-    case ADD_POST_SUCCESS: {
-      return {
-        ...state,
-        isaddPostLoading: false,
-        mainPosts: [action.payload, ...state.mainPosts],
-        images: []
-      };
-    }
-    case ADD_POST_FAILURE: {
-      return {
-        ...state,
-        isaddPostLoading: false,
-        images: [],
-        addPostErrorReason: action.error
-      };
-    }
-    case REMOVE_POST_REQUEST: {
-      return {
-        ...state,
-        isRemovePostLoading: true
-      };
-    }
-    case REMOVE_POST_SUCCESS: {
-      return {
-        ...state,
-        isRemovePostLoading: false,
-        mainPosts: state.mainPosts.filter(post => post.id !== action.payload)
-      };
-    }
-    case REMOVE_POST_FAILURE: {
-      return {
-        ...state,
-        removePostErrorReason: action.payload
-      };
-    }
-    case LOAD_MAIN_POST_REQUEST: {
-      return {
-        ...state,
-        isLoadPosts: true
-      };
-    }
-    case LOAD_MAIN_POST_SUCCESS: {
-      return {
-        ...state,
-        isLoadPosts: false,
-        mainPosts: state.mainPosts.concat(action.payload)
-      };
-    }
-    case LOAD_MAIN_POST_FAILURE: {
-      return {
-        ...state,
-        isLoadPosts: false,
-        isLoadPostError: action.error
-      };
-    }
-    case LOAD_HASHTAG_POST_REQUEST: {
-      return {
-        ...state,
-        isLoadPosts: true
-      };
-    }
-    case LOAD_HASHTAG_POST_SUCCESS: {
-      return {
-        ...state,
-        isLoadPosts: false,
-        hashTagPosts: state.hashTagPosts.concat(action.payload)
-      };
-    }
-    case LOAD_HASHTAG_POST_FAILURE: {
-      return {
-        ...state,
-        isLoadPosts: false,
-        isLoadPostError: action.error
-      };
-    }
-    case LOAD_USER_POST_REQUEST: {
-      return {
-        ...state
-      };
-    }
-    case LOAD_USER_POST_SUCCESS: {
-      return {
-        ...state
-      };
-    }
-    case LOAD_USER_POST_FAILURE: {
-      return {
-        ...state,
-        loadUserInfoError: action.error
-      };
-    }
-    case ADD_COMMENT_REQUEST: {
-      return {
-        ...state,
-        isAddComment: true
-      };
-    }
-    case ADD_COMMENT_SUCCESS: {
-      return {
-        ...state,
-        isAddComment: false
-      };
-    }
-    case ADD_COMMENT_FAILURE: {
-      return {
-        ...state,
-        isAddComment: false,
-        addCommentError: action.error
-      };
-    }
-    case UPLOAD_IMAGES_REQUEST: {
-      return {
-        ...state
-      };
-    }
-    case UPLOAD_IMAGES_SUCCESS: {
-      return {
-        ...state,
-        images: [...state.images, action.payload]
-      };
-    }
-    case UPLOAD_IMAGES_FAILURE: {
-      return {
-        ...state,
-        uploadError: action.error
-      };
-    }
-    // 비동기 처리가 필요없는 경우는 리덕스로만 처리
-    case REMOVE_IMAGE: {
-      return {
-        ...state,
-        images: state.images.filter((image, idx) => idx !== action.payload)
-      };
-    }
-    case LIKE_POST_REQUEST: {
-      return {
-        ...state
-      };
-    }
-    case LIKE_POST_SUCCESS: {
-      return {
-        ...state
-      };
-    }
-    case LIKE_POST_FAILURE: {
-      return {
-        ...state,
-        likePostError: action.error
-      };
-    }
-    case UNLIKE_POST_REQUEST: {
-      return {
-        ...state
-      };
-    }
-    case UNLIKE_POST_SUCCESS: {
-      return {
-        ...state
-      };
-    }
-    case UNLIKE_POST_FAILURE: {
-      return {
-        ...state,
-        unlikePostError: action.error
-      };
-    }
-    case RETWEET_REQUEST: {
-      return {
-        ...state
-      };
-    }
-    case RETWEET_SUCCESS: {
-      return {
-        ...state,
-        mainPosts: [action.payload, ...state.mainPosts]
-      };
-    }
-    case RETWEET_FAILURE: {
-      return {
-        ...state
-      };
-    }
-    default:
-      return state;
-  }
-};
+  });

@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { Avatar, Button } from "antd";
 import { LOAD_USER_REQUEST } from "../../reducers/user";
 import PostCard from "../../components/card/PostContainer";
+import { Container, Thumbnail, Description } from "./style";
 
 const User = () => {
   const { loadUserData } = useSelector(state => state.user);
@@ -10,44 +11,20 @@ const User = () => {
   return (
     userInfo &&
     loadUserData && (
-      <div>
-        <div
-          style={{
-            height: "400px",
-            position: "relative",
-            borderBottom: "1px dotted lightgray"
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: "60px",
-              left: "120px"
-            }}
-          >
+      <Container>
+        <div>
+          <Thumbnail>
             {userInfo.thumbnail === "none" ? (
               <Avatar icon="user" size={260} />
             ) : (
               <img
                 src={`http://localhost:3001/${userInfo.thumbnail}`}
                 alt="load error"
-                style={{
-                  width: "260px",
-                  height: "260px",
-                  borderRadius: "50%"
-                }}
               />
             )}
-          </div>
-          <div
-            style={{
-              position: "absolute",
-              top: "120px",
-              left: "500px",
-              fontSize: "32px"
-            }}
-          >
-            <div style={{ marginBottom: "30px" }}>
+          </Thumbnail>
+          <Description>
+            <div>
               <div>유저명: {userInfo.userId}</div>
               {loadUserData.id === userInfo.id ? (
                 <Button>내 정보 관리</Button>
@@ -67,13 +44,13 @@ const User = () => {
               <span>&nbsp;/&nbsp;</span>
               <span>팔로워 수: {userInfo.Followers}</span>
             </div>
-          </div>
+          </Description>
         </div>
         <div>
           <h1>{userInfo.userId}님의 최신 포스트</h1>
           <PostCard post={userInfo.Posts} used="USER" />
         </div>
-      </div>
+      </Container>
     )
   );
 };

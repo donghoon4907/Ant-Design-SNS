@@ -1,6 +1,4 @@
-/**
- * action / state / reducer
- */
+import produce from "immer";
 
 export const LOG_IN_REQUEST = "LOG_IN_REQUEST";
 export const LOG_IN_SUCCESS = "LOG_IN_SUCCESS";
@@ -60,199 +58,124 @@ export const initialState = {
   hasMoreFollowing: false // 더보기 버튼 보여줄지 여부
 };
 
-export default (state = initialState, action) => {
-  switch (action.type) {
-    case LOG_IN_REQUEST: {
-      return {
-        ...state,
-        isLoginLoading: true
-      };
-    }
-    case LOG_IN_SUCCESS: {
-      return {
-        ...state,
-        isLoginLoading: false
-      };
-    }
-    case LOG_IN_FAILURE: {
-      return {
-        ...state,
-        isLoginLoading: false,
-        loginErrorReason: action.error
-      };
-    }
-    case SIGN_UP_REQUEST: {
-      return {
-        ...state,
-        isSignUpLoading: true
-      };
-    }
-    case SIGN_UP_SUCCESS: {
-      return {
-        ...state,
-        isSignUpLoading: false
-      };
-    }
-    case SIGN_UP_FAILURE: {
-      return {
-        ...state,
-        isSignUpLoading: false,
-        signUpErrorReason: action.error
-      };
-    }
-    case LOG_OUT_REQUEST: {
-      return {
-        ...state,
-        isLogoutLoading: true
-      };
-    }
-    case LOG_OUT_SUCCESS: {
-      return {
-        ...state,
-        isLoggedIn: false,
-        isLogoutLoading: false,
-        loadUserData: null,
-        followerList: [],
-        followingList: [],
-        userInfo: null
-      };
-    }
-    case LOG_OUT_FAILURE: {
-      return {
-        ...state,
-        isLogoutLoading: false,
-        logOutErrorReason: action.error
-      };
-    }
-    // 로그인 시, 특정 유저 검색 시 이용됨
-    case LOAD_USER_REQUEST: {
-      return {
-        ...state
-      };
-    }
-    case LOAD_USER_SUCCESS: {
-      // 로그인된 정보를 가져올 경우 undefined, 특정 유저 검색시 me가 id값을 가집니다.
-      if (action.me) {
-        return {
-          ...state,
-          userInfo: action.payload
-        };
+export default (state = initialState, action) =>
+  produce(state, draft => {
+    switch (action.type) {
+      case LOG_IN_REQUEST: {
+        draft.isLoginLoading = true;
+        break;
       }
-      return {
-        ...state,
-        loadUserData: action.payload
-      };
-    }
-    case LOAD_USER_FAILURE: {
-      return {
-        ...state,
-        loadUserErrorReason: action.error
-      };
-    }
-    case FOLLOW_USER_REQUEST: {
-      return {
-        ...state
-      };
-    }
-    case FOLLOW_USER_SUCCESS: {
-      return {
-        ...state,
-        followingList: [...action.payload]
-      };
-    }
-    case FOLLOW_USER_FAILURE: {
-      return {
-        ...state
-      };
-    }
-    case UNFOLLOW_USER_REQUEST: {
-      return {
-        ...state
-      };
-    }
-    case UNFOLLOW_USER_SUCCESS: {
-      return {
-        ...state,
-        followingList: state.followingList.filter(v => v.id !== action.payload)
-      };
-    }
-    case UNFOLLOW_USER_FAILURE: {
-      return {
-        ...state
-      };
-    }
-    case LOAD_FOLLOWERS_REQUEST: {
-      return {
-        ...state,
-        hasMoreFollower: action.lastId ? state.hasMoreFollower : true
-      };
-    }
-    case LOAD_FOLLOWERS_SUCCESS: {
-      return {
-        ...state,
-        followerList: state.followerList.concat(action.payload),
-        hasMoreFollower: action.payload.length === 6
-      };
-    }
-    case LOAD_FOLLOWERS_FAILURE: {
-      return {
-        ...state
-      };
-    }
-    case LOAD_FOLLOWINGS_REQUEST: {
-      return {
-        ...state,
-        hasMoreFollowing: action.offset ? state.hasMoreFollowing : true
-      };
-    }
-    case LOAD_FOLLOWINGS_SUCCESS: {
-      return {
-        ...state,
-        followingList: state.followingList.concat(action.payload),
-        hasMoreFollowing: action.payload.length === 6
-      };
-    }
-    case LOAD_FOLLOWINGS_FAILURE: {
-      return {
-        ...state
-      };
-    }
-    case REMOVE_FOLLOWER_REQUEST: {
-      return {
-        ...state
-      };
-    }
-    case REMOVE_FOLLOWER_SUCCESS: {
-      return {
-        ...state
-      };
-    }
-    case REMOVE_FOLLOWER_FAILURE: {
-      return {
-        ...state
-      };
-    }
-    case EDIT_USERID_REQUEST: {
-      return {
-        ...state
-      };
-    }
-    case EDIT_USERID_SUCCESS: {
-      return {
-        ...state,
-        loadUserData: {
-          ...state.loadUserData,
-          userId: action.payload
+      case LOG_IN_SUCCESS: {
+        draft.isLoginLoading = false;
+        break;
+      }
+      case LOG_IN_FAILURE: {
+        draft.isLoginLoading = false;
+        draft.loginErrorReason = action.error;
+        break;
+      }
+      case SIGN_UP_REQUEST: {
+        draft.isSignUpLoading = true;
+        break;
+      }
+      case SIGN_UP_SUCCESS: {
+        draft.isSignUpLoading = false;
+        break;
+      }
+      case SIGN_UP_FAILURE: {
+        draft.isSignUpLoading = false;
+        draft.signUpErrorReason = action.error;
+        break;
+      }
+      case LOG_OUT_REQUEST: {
+        draft.isLogoutLoading = true;
+        break;
+      }
+      case LOG_OUT_SUCCESS: {
+        draft.isLoggedIn = false;
+        draft.isLogoutLoading = false;
+        draft.loadUserData = null;
+        draft.followerList = [];
+        draft.followingList = [];
+        draft.userInfo = null;
+        break;
+      }
+      case LOG_OUT_FAILURE: {
+        draft.isLogoutLoading = false;
+        draft.logOutErrorReason = action.error;
+        break;
+      }
+      // 로그인 시, 특정 유저 검색 시 이용됨
+      case LOAD_USER_REQUEST:
+        break;
+      case LOAD_USER_SUCCESS: {
+        // 로그인된 정보를 가져올 경우 undefined, 특정 유저 검색시 me가 id값을 가집니다.
+        if (action.me) {
+          draft.userInfo = action.payload;
+          break;
         }
-      };
+        draft.loadUserData = action.payload;
+        break;
+      }
+      case LOAD_USER_FAILURE: {
+        draft.loadUserErrorReason = action.error;
+        break;
+      }
+      case FOLLOW_USER_REQUEST:
+        break;
+      case FOLLOW_USER_SUCCESS: {
+        draft.followingList = [];
+        action.payload.forEach(v => draft.followingList.push(v));
+        break;
+      }
+      case FOLLOW_USER_FAILURE:
+        break;
+      case UNFOLLOW_USER_REQUEST:
+        break;
+      case UNFOLLOW_USER_SUCCESS: {
+        const idx = draft.followingList.findIndex(v => v.id === action.payload);
+        draft.followingList.splice(idx, 1);
+        break;
+      }
+      case UNFOLLOW_USER_FAILURE:
+        break;
+      case LOAD_FOLLOWERS_REQUEST: {
+        draft.hasMoreFollower = action.lastId ? state.hasMoreFollower : true;
+        break;
+      }
+      case LOAD_FOLLOWERS_SUCCESS: {
+        action.payload.forEach(v => draft.followerList.push(v));
+        draft.hasMoreFollower = action.payload.length === 6;
+        break;
+      }
+      case LOAD_FOLLOWERS_FAILURE:
+        break;
+      case LOAD_FOLLOWINGS_REQUEST: {
+        draft.hasMoreFollowing = action.offset ? state.hasMoreFollowing : true;
+        break;
+      }
+      case LOAD_FOLLOWINGS_SUCCESS: {
+        action.payload.forEach(v => draft.followingList.push(v));
+        draft.hasMoreFollowing = action.payload.length === 6;
+        break;
+      }
+      case LOAD_FOLLOWINGS_FAILURE:
+        break;
+      case REMOVE_FOLLOWER_REQUEST:
+        break;
+      case REMOVE_FOLLOWER_SUCCESS:
+        break;
+      case REMOVE_FOLLOWER_FAILURE:
+        break;
+      case EDIT_USERID_REQUEST:
+        break;
+      case EDIT_USERID_SUCCESS: {
+        draft.loadUserData.userId = action.payload;
+        break;
+      }
+      case EDIT_USERID_FAILURE:
+        break;
+      default:
+        return state;
     }
-    case EDIT_USERID_FAILURE: {
-      return {
-        ...state
-      };
-    }
-
-    default:
-      return state;
-  }
-};
+  });

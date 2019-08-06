@@ -2,8 +2,13 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Card, Button, Icon, Avatar, Popover } from "antd";
 import Link from "next/link";
-import TextareaAutosize from "react-autosize-textarea";
 import PostImages from "../PostImages";
+import {
+  CommentSubmit,
+  CommentContainer,
+  CommentTextArea,
+  PostTitle
+} from "./PostStyledComponent";
 // 현재 loadUserData는 id값만 가지고 있음.
 const PostPresentation = ({
   post,
@@ -112,12 +117,10 @@ const PostPresentation = ({
     ) : (
       <Card.Meta
         title={
-          <div>
-            <div style={{ float: "left" }}>제목: {post.title}</div>
-            <div style={{ float: "right" }}>
-              {post.createdAt.replace("T", " ").substring(0, 19)}
-            </div>
-          </div>
+          <PostTitle>
+            <div itemScope="title">제목: {post.title}</div>
+            <div>{post.createdAt.replace("T", " ").substring(0, 19)}</div>
+          </PostTitle>
         }
         description={
           <>
@@ -133,38 +136,22 @@ const PostPresentation = ({
                 <a>{post.User.userId}</a>
               </Link>
             </div>
-            <div style={{ marginTop: "20px" }}>
+            <CommentContainer>
               <div>댓글 목록({commentCount})</div>
               <div>{mapToComment.call(this, post)}</div>
               <div>{mapToAddComment.call(this)}</div>
               <form onSubmit={onSubmit}>
                 <div style={{ position: "relative" }}>
-                  <TextareaAutosize
+                  <CommentTextArea
                     ref={commentRef}
                     placeholder="댓글을 입력하세요."
-                    style={{
-                      float: "left",
-                      width: "85%",
-                      fontSize: "18px",
-                      border: "1px solid lightgray"
-                    }}
                   />
-                  <Button
-                    htmlType="submit"
-                    loading={isAddComment}
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      right: 0,
-                      width: "15%",
-                      borderRadius: 0
-                    }}
-                  >
+                  <CommentSubmit htmlType="submit" loading={isAddComment}>
                     작성
-                  </Button>
+                  </CommentSubmit>
                 </div>
               </form>
-            </div>
+            </CommentContainer>
           </>
         }
       />

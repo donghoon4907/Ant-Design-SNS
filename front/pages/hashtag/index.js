@@ -1,25 +1,35 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { useSelector, useDispatch } from "react-redux";
 import PostCard from "../../components/card/PostContainer";
-import { LOAD_HASHTAG_POST_REQUEST } from "../../reducers/post";
+import {
+  LOAD_HASHTAG_POST_REQUEST,
+  INIT_HASHTAG_POST
+} from "../../reducers/post";
 
 const HashTag = ({ tag }) => {
   const dispatch = useDispatch();
+  const countRef = useRef([]);
   const { hashTagPosts } = useSelector(state => state.post);
   const onScroll = () => {
     const scrollY = window.scrollY;
-    const clientHeight = document.documentElement.clientHeight;
-    const scrollHeight = document.documentElement.scrollHeight;
+    const { clientHeight, scrollHeight } = document.documentElement;
+    const lastId =
+      hashTagPosts[hashTagPosts.length - 1] &&
+      hashTagPosts[hashTagPosts.length - 1].id;
+
     if (
       scrollY + clientHeight > scrollHeight - 300 &&
       hashTagPosts.length % 5 === 0
     ) {
-      return dispatch({
-        type: LOAD_HASHTAG_POST_REQUEST,
-        payload: hashTagPosts[hashTagPosts.length - 1].id,
-        tag
-      });
+      if (!countRef.current.includes(lastId)) {
+        dispatch({
+          type: LOAD_HASHTAG_POST_REQUEST,
+          payload: lastId,
+          tag
+        });
+        countRef.current.push(lastId);
+      }
     }
   };
   const mapToComponent = useCallback(
@@ -48,8 +58,9 @@ const HashTag = ({ tag }) => {
 HashTag.getInitialProps = async context => {
   const { tag } = context.query;
   const { store } = context;
-  const state = store.getState();
-  state.post.hashTagPosts = [];
+  store.dispatch({
+    type: INIT_HASHTAG_POST
+  });
   store.dispatch({
     type: LOAD_HASHTAG_POST_REQUEST,
     payload: tag

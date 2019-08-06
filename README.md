@@ -81,3 +81,11 @@ Ant Design, Next.js, express, mysql redux-saga
 3. 해쉬태그 및 메인 포스트 인피니티 스크롤링을 통한 페이지네이션 구현
 
 - after: 포스트 수정, multer
+
+20190806
+
+1. styled-component ssr
+2. seo 검색엔진 최적화
+
+- after: 포스트 수정, multer, 각 페이지별 검색엔진 최적화 적용하기
+- memo: styled-components의 ThemeProvider 사용 시 next 8.1.0에서 동작하지 않음을 버전업을 통해 해결

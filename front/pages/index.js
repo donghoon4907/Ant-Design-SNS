@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "antd";
 import { LOAD_MAIN_POST_REQUEST } from "../reducers/post";
@@ -7,22 +7,29 @@ import PostCard from "../components/card/PostContainer";
 
 const Main = () => {
   const dispatch = useDispatch();
+  const countRef = useRef([]);
   const [visibleModal, setVisibleModal] = useState(false);
-  const { mainPosts } = useSelector(state => state.post);
-  const { isLoadPosts } = useSelector(state => state.post);
+  const { mainPosts, isLoadPosts } = useSelector(state => state.post);
+
   const onScroll = () => {
     const scrollY = window.scrollY; // 스크롤 내린 거리
-    const clientHeight = document.documentElement.clientHeight; // 화면 높이
-    const scrollHeight = document.documentElement.scrollHeight; // 전체 화면 길이
+    const { clientHeight, scrollHeight } = document.documentElement; // 화면 높이 및 전체 화면 길이
+    const lastId =
+      mainPosts[mainPosts.length - 1] && mainPosts[mainPosts.length - 1].id;
+    // 특정 위치로 스크롤 한 경우
     if (
       scrollY + clientHeight > scrollHeight - 300 &&
       mainPosts.length % 5 === 0
     ) {
-      // 마지막 포스트의 아이디로 다음 컨텐츠를 요청합니다.
-      return dispatch({
-        type: LOAD_MAIN_POST_REQUEST,
-        payload: mainPosts[mainPosts.length - 1].id
-      });
+      // 저장되지 않은 id일 경우
+      if (!countRef.current.includes(lastId)) {
+        // 마지막 포스트의 아이디로 다음 컨텐츠를 요청합니다.
+        dispatch({
+          type: LOAD_MAIN_POST_REQUEST,
+          payload: lastId
+        });
+        countRef.current.push(lastId);
+      }
     }
   };
   const onClickAddPost = useCallback(() => {
@@ -69,3 +76,29 @@ Main.getInitialProps = async context => {
 };
 
 export default Main;
+
+/* 검색엔진 최적화 
+          <Helmet
+            title={`${post.User.userId}님의 글`}
+            description={post.content}
+            meta={[
+              { name: "description", content: post.content },
+              {
+                property: "og:title",
+                content: `${post.User.userId}님의 게시글`
+              },
+              { property: "og:description", content: post.content },
+              {
+                property: "og:image",
+                content:
+                  post.Images[0] &&
+                  `http://localhost:3065/${post.Images[0].src}`
+              },
+              {
+                property: "og:url",
+                content: `http://localhost:3060/post/${post.id}`
+              }
+            ]}
+          />
+          - itemScope
+          */

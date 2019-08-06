@@ -1,11 +1,4 @@
 import styled from "styled-components";
-import { Menu } from "antd";
-
-export const StyledMenu = styled(Menu)`
-  height: 80vh;
-  margin-top: 1vh;
-  border-top: 1px solid #e8e8e8;
-`;
 
 export const LayoutContainer = styled.div`
   position: fixed;

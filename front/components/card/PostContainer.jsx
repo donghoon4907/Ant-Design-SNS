@@ -115,7 +115,7 @@ const PostContainer = ({ post, used }) => {
                 as={`/hashtag/${val.slice(1)}`}
                 key={val}
               >
-                <a>{val}</a>
+                <a itemScope="content">{val}</a>
               </Link>
             );
           }
