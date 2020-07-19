@@ -1,6 +1,6 @@
-# AntD-SNS
+# NEXT_SNS
 
-Ant Design, Next.js, express, mysql redux-saga
+Ant Design, Next.js, express, mysql, redux-saga
 
 20190709
 
